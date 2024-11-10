@@ -27,71 +27,7 @@ async def on_message(message):
         await message.channel.send("Working")
     
     if message.content.startswith('.expose'):
-        mentions = message.mentions
-        if len(mentions) == 0:
-            return
-        user = mentions[0]
-
-        archiveFile = get_channel_archive_filename(message.channel.id)
-        sentMessagesFile = get_channel_sent_filename(message.channel.id)
-
-        messageIds = get_all_messages(archiveFile)
-        if len(messageIds) == 0:
-            before = datetime(2017, 10, 20)
-            async for x in message.channel.history(limit=None, before=before):
-                store_message(x.id, archiveFile)
-                messageIds.append(x.id)
-        
-        if len(messageIds) == 0:
-            await message.channel.send("No messages are old enough")
-            return
-
-        random_index = random.randint(0, len(messageIds) - 1)
-        id = messageIds[random_index]
-
-        sentMessagesIds = get_all_messages(sentMessagesFile)
-
-        msg = await message.channel.fetch_message(id)
-
-        nonAllowedMessageIds = sentMessagesIds
-
-        i = 0
-        #Only try 10 times
-        for i in range(0, 10):
-            while id in nonAllowedMessageIds:
-                messageIds.pop(random_index)
-                random_index = random.randint(0, len(messageIds) - 1)
-                print("Try new index: " + str(random_index))
-                id = messageIds[random_index]
-
-            msg = await message.channel.fetch_message(id)
-            print("New message, id: " + str(msg.id))
-            print("Author: " + msg.author.name)
-
-            #Also allow to find messages of the person who runs the command
-            if msg.author.name == message.author.name:
-                break
-            #Prevent @-ing randos
-            if msg.author.name in allowedUsers:
-                break
-            if i >= 10:
-                break
-
-            nonAllowedMessageIds.append(msg.id)
-            print("\n")
-
-        print("\n")
-        if i >= 9:
-            await message.channel.send("Seems hard to find a suitable message...")
-            return
-
-        reference = discord.MessageReference.from_message(msg)
-
-        await msg.channel.send(str(msg.created_at.strftime('%Y-%m-%d %H:%M')) + "\n\n" + msg.content, reference=reference, files=[await x.to_file() for x in msg.attachments])
-        store_message(msg.id, sentMessagesFile)
-
-
-
+        pass
 
 
     if message.content.startswith('.grab-memory'):

@@ -4,5 +4,4 @@
 ```
     botToken = "your_token_goes_here"
 ```
-
-    - replace your_token_goes_here with your discord bot token
+   - replace your_token_goes_here with your discord bot token

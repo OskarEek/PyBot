@@ -1,11 +1,12 @@
 from datetime import datetime
 import random
 import discord
+from discord import Message
 
 from Services import FileService
 from Models.MessageData import MessageData
 
-async def grab_memory(message):
+async def grab_memory(message: Message):
     print("==== " + message.author.name + " =============================")
     allowedUsers = [".eek", "kurkon", "luddelino", "popapea", "zyrbz", "sandin9", "ejctom", "gurkface"]
     archiveFile = FileService.get_archive_filename(message.channel.id, message.created_at)

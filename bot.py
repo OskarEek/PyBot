@@ -1,4 +1,5 @@
 import discord
+from discord import Message
 from BotFunctions.GrabMemory import grab_memory
 from botToken import botToken
 
@@ -12,7 +13,7 @@ async def on_ready():
     print(f'We have logged in as {client.user}')
 
 @client.event
-async def on_message(message):
+async def on_message(message: Message):
     if message.author.bot:
         return
 
@@ -25,7 +26,6 @@ async def on_message(message):
 
     if message.content.startswith('.grab-memory'):
         await grab_memory(message)
-
 
 
 

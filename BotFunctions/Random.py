@@ -13,4 +13,4 @@ async def randomizer(message: Message):
         await message.channel.send(f'{chosen_phrase}')
 
     else:
-        await message.channel.send('Skriv ord efter .random.')
+        await message.channel.send('Write something after .random.')

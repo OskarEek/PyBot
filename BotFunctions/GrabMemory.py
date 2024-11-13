@@ -40,7 +40,7 @@ async def grab_memory(message):
     for i in range(0, 10):
         while dataMsg.id in nonAllowedMessageIds:
             messages.pop(random_message_index)
-            random_index = random.randint(0, len(messages) - 1)
+            random_message_index = random.randint(0, len(messages) - 1)
             print("Try new index: " + str(random_message_index))
             dataMsg = messages[random_message_index]
 

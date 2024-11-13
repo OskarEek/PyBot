@@ -47,13 +47,17 @@ async def grab_memory(message):
         print("New message, id: " + str(dataMsg.id))
         print("Author: " + dataMsg.authorName)
 
-        #Also allow to find messages of the person who runs the command
-        if dataMsg.authorName == message.author.name:
-            break
-        #Prevent @-ing randos
-        if dataMsg.authorName in allowedUsers:
-            break
-        if i >= 10:
+        messageAllowed = True
+        #Just choosing messages from known people
+        if " all" not in message.content:
+            if dataMsg.authorName not in allowedUsers:
+                messageAllowed = False
+            #If its the author sending the message, allow it
+            if dataMsg.authorName == message.author.name:
+                messageAllowed = True
+
+        print("Message allowed: " + str(messageAllowed))
+        if messageAllowed:
             break
 
         nonAllowedMessageIds.append(dataMsg.id)
@@ -65,7 +69,15 @@ async def grab_memory(message):
         return
 
     msg = await message.channel.fetch_message(dataMsg.id)
+
+
+    #Reference is replaced with msg.jump_url in the content of the message to prevent at-ing people
     reference = discord.MessageReference.from_message(msg)
 
-    await msg.channel.send(str(msg.created_at.strftime('%Y-%m-%d %H:%M'))  + "\n" + msg.jump_url + "\n\n" + msg.content, files=[await x.to_file() for x in msg.attachments])
+    botContent = str(msg.created_at.strftime('%Y-%m-%d %H:%M')) + " " + msg.jump_url + "\n\n" + "**" + msg.author.global_name + ":**" + "\n" + msg.content
+
+    #Reference is replaced with msg.jump_url in the content of the message to prevent at-ing people
+    #await msg.channel.send(botContent, reference=reference, files=[await x.to_file() for x in msg.attachments])
+    await msg.channel.send(botContent, files=[await x.to_file() for x in msg.attachments])
+
     FileService.store_sent_messageId(msg.id, sentMessagesFile)

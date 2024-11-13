@@ -67,5 +67,5 @@ async def grab_memory(message):
     msg = await message.channel.fetch_message(dataMsg.id)
     reference = discord.MessageReference.from_message(msg)
 
-    await msg.channel.send(str(msg.created_at.strftime('%Y-%m-%d %H:%M')) + "\n\n" + msg.content, reference=reference, files=[await x.to_file() for x in msg.attachments])
+    await msg.channel.send(str(msg.created_at.strftime('%Y-%m-%d %H:%M'))  + "\n" + msg.jump_url + "\n\n" + msg.content, files=[await x.to_file() for x in msg.attachments])
     FileService.store_sent_messageId(msg.id, sentMessagesFile)

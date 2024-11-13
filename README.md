@@ -5,3 +5,6 @@
     botToken = "your_token_goes_here"
 ```
    - replace your_token_goes_here with your discord bot token
+
+
+3. Run bot: "python -m bot"

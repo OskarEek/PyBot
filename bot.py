@@ -3,6 +3,7 @@ from discord import Message
 from BotFunctions.GrabMemory import grab_memory
 from BotFunctions import Gamble
 from BotFunctions.Random import randomizer
+from BotFunctions import Help
 from botToken import botToken
 
 intents = discord.Intents.default()
@@ -50,6 +51,8 @@ async def on_message(message: Message):
     if message.content.startswith('.random'):
         await randomizer(message)
 
+    if message.content.startswith('.help'):
+        await Help.help(message)
 
 
 

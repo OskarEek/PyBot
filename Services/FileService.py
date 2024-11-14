@@ -8,7 +8,7 @@ from Models.MessageData import MessageData
 
 BASE_FILE_PATH = "./DataFiles"
 
-def create_file_if_not_exists(file_path: str):
+def create_file_if_not_exists(file_path: str, data = None):
     #Create directory
     directory = os.path.dirname(file_path)
     if not os.path.exists(directory):
@@ -17,7 +17,10 @@ def create_file_if_not_exists(file_path: str):
     #Create file
     if not os.path.exists(file_path):
         with open(file_path, 'w') as f:
-            json.dump([], f)
+            if data == None:
+                json.dump([], f)
+            else:
+                json.dump(data, f)
             return True
     else:
         return False
@@ -71,6 +74,102 @@ def get_archive_messages(file_path: str):
         data = json.load(f)
         messages = [MessageData.from_dict(data=item) for item in data]
         return messages
+
+def store_user_points(userId: str, points: int):
+    file = get_user_points_filename()
+    if create_file_if_not_exists(file, {userId : points}):
+        return
+
+    with open(file, 'r') as f:
+        data = json.load(f)
+    
+    data[userId] = points
+
+    with open(file, 'w') as f:
+        json.dump(data, f)
+
+def get_user_points(userId: str):
+    file = get_user_points_filename()
+    if create_file_if_not_exists(file, {}):
+        return 0
+
+    with open(file, 'r') as f:
+        data = json.load(f)
+        if userId in data:
+            return data[userId]
+        else:
+            return 0
+            
+def get_leaderboard_points():
+    file = get_user_points_filename()
+    if create_file_if_not_exists(file, {}):
+        return []
+
+    with open(file, 'r') as f:
+        data = json.load(f)
+        return sorted(data.items(), key=lambda item: item[1], reverse=True)[:3]
+
+def store_challange(creatorId: str, opponentId: str, points: int):
+    file = get_challange_filename()
+    create_file_if_not_exists(file, {})
+
+    with open(file, 'r') as f:
+        data = json.load(f)
+
+    challanges = []
+    if opponentId in data:
+        challanges = data[opponentId]
+    
+    for d in challanges:
+        if d["creatorId"] == creatorId:
+            challanges.remove(d)
+            break  # Exit loop after 
+
+    challanges.append({"creatorId": creatorId, "points": points})
+    data[opponentId] = challanges
+
+    with open(file, 'w') as f:
+        json.dump(data, f)
+
+def get_challange(opponentId: str, creatorId: str):
+    file = get_challange_filename()
+    if create_file_if_not_exists(file, {}):
+        return None
+    
+    with open(file, 'r') as f:
+        data = json.load(f)
+
+    challanges = []
+    if opponentId in data:
+        challanges = data[opponentId]
+
+    for d in challanges:
+        if d["creatorId"] == creatorId:
+            return d
+
+    return None
+
+def remove_challange(opponentId: str, creatorId: str):
+    file = get_challange_filename()
+    if create_file_if_not_exists(file, {}):
+        return
+
+    with open(file, 'r') as f:
+        data = json.load(f)
+
+    challanges = []
+    if opponentId in data:
+        challanges = data[opponentId]
+    
+    for d in challanges:
+        if d["creatorId"] == creatorId:
+            challanges.remove(d)
+            break
+
+    data[opponentId] = challanges
+
+    with open(file, 'w') as f:
+        json.dump(data, f)
     
 def count_items_in_folder(file_path):
     directory = os.path.dirname(file_path)
@@ -95,3 +194,10 @@ def get_archive_filename(id: int, fileName: datetime):
 
 def get_channel_sent_filename(id: int):
     return f"{BASE_FILE_PATH}/SentMessages/{str(id)}.json"
+
+
+def get_user_points_filename():
+    return f"{BASE_FILE_PATH}/Gamble/userpoints.json"
+
+def get_challange_filename():
+    return f"{BASE_FILE_PATH}/Gamble/challanges.json"

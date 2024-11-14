@@ -1,6 +1,7 @@
 import discord
 from discord import Message
 from BotFunctions.GrabMemory import grab_memory
+from BotFunctions import Gamble
 from BotFunctions.Random import randomizer
 from botToken import botToken
 
@@ -24,6 +25,24 @@ async def on_message(message: Message):
     
     if message.content.startswith('.expose'):
         pass
+
+    if message.content.startswith('.free-points'):
+        await Gamble.free_points(message)
+
+    if message.content.startswith('.gamble'):
+        await Gamble.gamble(message)
+
+    if message.content.startswith('.points'):
+        await Gamble.points(message)
+
+    if message.content.startswith('.challenge'):
+        await Gamble.challange(message)
+
+    if message.content.startswith('.respond-challenge'):
+        await Gamble.respond_challange(message)
+
+    if message.content.startswith('.leaderboard'):
+        await Gamble.leaderboard(message)
 
     if message.content.startswith('.grab-memory'):
         await grab_memory(message)

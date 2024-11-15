@@ -39,7 +39,7 @@ async def on_message(message: Message):
     if message.content.startswith('.challenge'):
         await Gamble.challange(message)
 
-    if message.content.startswith('.respond-challenge'):
+    if message.content.startswith('.respond'):
         await Gamble.respond_challange(message)
 
     if message.content.startswith('.leaderboard'):

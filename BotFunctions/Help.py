@@ -15,7 +15,7 @@ async def help(message: Message):
         "       .gamble *integer*\n",
         "       .gamble all\n",
         "       .challenge *@user* *integer*\n",
-        "       .respond-challenge *@user* *integer*",
+        "       .respond *@user* *integer*",
     ]
 
     botContent = "".join(helpMessage)

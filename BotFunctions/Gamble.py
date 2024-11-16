@@ -7,6 +7,10 @@ async def free_points(message: Message):
     userId = str(message.author.id)
     currentPoints = FileService.get_user_points(userId)
 
+    if user_in_lottery(userId):
+        await message.channel.send("You cant get free points while in a lottery")
+        return
+
     if currentPoints > 0:
         await message.channel.send("You already have: " + str(currentPoints) + " points")
         return
@@ -161,3 +165,17 @@ async def leaderboard(message: Message):
         i += 1
 
     await message.channel.send(content)
+
+def user_in_lottery(userId: str):
+    file_path = FileService.get_lottery_file_path()
+    data = FileService.get_file_data(file_path)
+
+    if data == None or len(data) == 0:
+        return False
+
+    entries = data["entries"]
+    for userEntry in entries:
+        if userEntry["userId"] == userId:
+            return True
+    
+    return False

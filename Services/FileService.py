@@ -8,6 +8,26 @@ from Models.MessageData import MessageData
 
 BASE_FILE_PATH = "./DataFiles"
 
+def get_base_file_path():
+    return BASE_FILE_PATH
+
+def store_file_data(file_path: str, data):
+    if create_file_if_not_exists(file_path, data):
+        return
+    with open(file_path, 'w') as f:
+        json.dump(data, f)
+
+def get_file_data(file_path: str):
+    if not file_exists(file_path):
+        return None
+    with open(file_path, 'r') as f:
+        return json.load(f)
+
+def file_exists(file_path: str):
+    if os.path.exists(file_path):
+        return True
+    return False
+
 def create_file_if_not_exists(file_path: str, data = None):
     #Create directory
     directory = os.path.dirname(file_path)
@@ -201,3 +221,6 @@ def get_user_points_filename():
 
 def get_challange_filename():
     return f"{BASE_FILE_PATH}/Gamble/challanges.json"
+
+def get_lottery_file_path():
+    return f"{BASE_FILE_PATH}/Lottery/lottery.json"

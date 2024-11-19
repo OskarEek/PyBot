@@ -2,10 +2,13 @@ from discord import Message
 from Services import FileService
 import discord
 import random
+import time
 
 async def free_points(message: Message):
     userId = str(message.author.id)
     currentPoints = FileService.get_user_points(userId)
+    cooldowns = FileService.load_cooldowns()
+    currentTime = time.time()
 
     if user_in_lottery(userId):
         await message.channel.send("You cant get free points while in a lottery")
@@ -14,8 +17,19 @@ async def free_points(message: Message):
     if currentPoints > 0:
         await message.channel.send("You already have: " + str(currentPoints) + " points")
         return
+    
+    if userId in cooldowns:
+        time_since_last_use = currentTime - cooldowns[userId]
+        if time_since_last_use < 15 * 60:  # 15 minutes in seconds
+            remaining_time = 15 * 60 - time_since_last_use
+            minutes = int(remaining_time // 60)
+            seconds = int(remaining_time % 60)
+            await message.channel.send(f"You can claim free points again in {minutes} minutes and {seconds} seconds.")
+            return
 
     FileService.store_user_points(userId, 500)
+    cooldowns[userId] = currentTime
+    FileService.save_cooldowns(cooldowns)
     await message.channel.send("500 points were given to: " + message.author.global_name)
 
 async def points(message: Message):

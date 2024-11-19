@@ -238,5 +238,7 @@ def load_cooldowns():
 
 def save_cooldowns(cooldowns):
     file = get_cooldown_file_path()
-    with open(file, "w+") as f:
+    if create_file_if_not_exists(file, cooldowns):
+        return
+    with open(file, "w") as f:
         json.dump(cooldowns, f)

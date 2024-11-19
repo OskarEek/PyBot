@@ -23,7 +23,7 @@ async def free_points(message: Message):
     if userId in cooldowns:
         time_since_last_use = currentTime - cooldowns[userId]
         if time_since_last_use < FREE_POINTS_COOLDOWN * 60:  # 15 minutes in seconds
-            remaining_time = 15 * 60 - time_since_last_use
+            remaining_time = FREE_POINTS_COOLDOWN * 60 - time_since_last_use
             minutes = int(remaining_time // 60)
             seconds = int(remaining_time % 60)
             await message.channel.send(f"You can claim free points again in {minutes} minutes and {seconds} seconds.")

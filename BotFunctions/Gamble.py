@@ -4,6 +4,8 @@ import discord
 import random
 import time
 
+FREE_POINTS_COOLDOWN = 15 #Minutes
+
 async def free_points(message: Message):
     userId = str(message.author.id)
     currentPoints = FileService.get_user_points(userId)
@@ -20,7 +22,7 @@ async def free_points(message: Message):
     
     if userId in cooldowns:
         time_since_last_use = currentTime - cooldowns[userId]
-        if time_since_last_use < 15 * 60:  # 15 minutes in seconds
+        if time_since_last_use < FREE_POINTS_COOLDOWN * 60:  # 15 minutes in seconds
             remaining_time = 15 * 60 - time_since_last_use
             minutes = int(remaining_time // 60)
             seconds = int(remaining_time % 60)

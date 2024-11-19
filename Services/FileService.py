@@ -224,3 +224,21 @@ def get_challange_filename():
 
 def get_lottery_file_path():
     return f"{BASE_FILE_PATH}/Lottery/lottery.json"
+
+def get_cooldown_file_path():
+    return f"{BASE_FILE_PATH}/Gamble/cooldowns.json"
+
+def load_cooldowns():
+    file = get_cooldown_file_path()
+
+    if os.path.exists(file):
+        with open(file, "r") as f:
+            return json.load(f)
+    return {}
+
+def save_cooldowns(cooldowns):
+    file = get_cooldown_file_path()
+    if create_file_if_not_exists(file, cooldowns):
+        return
+    with open(file, "w") as f:
+        json.dump(cooldowns, f)

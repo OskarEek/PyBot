@@ -6,6 +6,7 @@ from BotFunctions.Random import randomizer
 from BotFunctions import Help
 from botToken import botToken
 from BotFunctions import Lottery
+from BotFunctions import Roulette
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -63,5 +64,12 @@ async def on_message(message: Message):
 
     if message.content.startswith('.end-lottery'):
         await Lottery.end_lottery(message)
+
+    if message.content.startswith('.roulette'):
+        await Roulette.roulette(message)
+    
+    if message.content.startswith('.end-roulette'):
+        await Roulette.end_roulette(message)
+    
 
 client.run(botToken)

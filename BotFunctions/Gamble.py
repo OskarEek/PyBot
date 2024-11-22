@@ -6,21 +6,27 @@ import time
 
 FREE_POINTS_COOLDOWN = 15 #Minutes
 
+TEST = False
+
 async def free_points(message: Message):
     userId = str(message.author.id)
     currentPoints = FileService.get_user_points(userId)
-    cooldowns = FileService.load_cooldowns()
     currentTime = time.time()
+
+    if currentPoints > 0:
+        await message.channel.send("You already have: " + str(currentPoints) + " points")
+        return
 
     if user_in_lottery(userId):
         await message.channel.send("You cant get free points while in a lottery")
         return
 
-    if currentPoints > 0:
-        await message.channel.send("You already have: " + str(currentPoints) + " points")
+    if user_in_roulette(userId):
+        await message.channel.send("You cant get free points while in a roulette")
         return
     
-    if userId in cooldowns:
+    cooldowns = FileService.load_cooldowns()
+    if not TEST and userId in cooldowns:
         time_since_last_use = currentTime - cooldowns[userId]
         if time_since_last_use < FREE_POINTS_COOLDOWN * 60:  # 15 minutes in seconds
             remaining_time = FREE_POINTS_COOLDOWN * 60 - time_since_last_use
@@ -184,6 +190,20 @@ async def leaderboard(message: Message):
 
 def user_in_lottery(userId: str):
     file_path = FileService.get_lottery_file_path()
+    data = FileService.get_file_data(file_path)
+
+    if data == None or len(data) == 0:
+        return False
+
+    entries = data["entries"]
+    for userEntry in entries:
+        if userEntry["userId"] == userId:
+            return True
+    
+    return False
+
+def user_in_roulette(userId: str):
+    file_path = FileService.get_roulette_file_path()
     data = FileService.get_file_data(file_path)
 
     if data == None or len(data) == 0:

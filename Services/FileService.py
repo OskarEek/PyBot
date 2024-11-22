@@ -228,6 +228,9 @@ def get_lottery_file_path():
 def get_cooldown_file_path():
     return f"{BASE_FILE_PATH}/Gamble/cooldowns.json"
 
+def get_roulette_file_path():
+    return f"{BASE_FILE_PATH}/Roulette/roulette.json"
+
 def load_cooldowns():
     file = get_cooldown_file_path()
 

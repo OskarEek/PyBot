@@ -4,7 +4,7 @@ import discord
 import random
 import time
 
-FREE_POINTS_COOLDOWN = 15 #Minutes
+FREE_POINTS_COOLDOWN = 5 #Minutes
 
 TEST = False
 

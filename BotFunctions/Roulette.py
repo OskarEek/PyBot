@@ -126,11 +126,11 @@ async def end_roulette(message: Message):
     middleMessage = await message.channel.send(middleRow)
     bottomMessage = await message.channel.send(bottomRow)
 
-    numberOfLoops = 10
+    numberOfLoops = random.randint(6, 20)
     speed = 0.2
     endSpeed = 1.5
     for i in range(1, numberOfLoops):
-        if numberOfLoops - i == 4:
+        if numberOfLoops - i <= 4:
             speed += endSpeed / 4
         time.sleep(speed)
         middleRowList = generate_middle_row(startingPoint + i, playingCards)

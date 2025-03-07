@@ -1,7 +1,9 @@
 from discord import Message
-from Services import FileService
 from datetime import datetime, timedelta
 import random
+
+from Services import FileService
+from Services import PointsService
 
 async def start_lottery(message: Message):
     if ongoing_lottery():
@@ -13,7 +15,7 @@ async def start_lottery(message: Message):
         userId = str(message.author.id)
         userInput = message.content.split(" ")[-1]
         poinstToGamble = 0
-        currentPoints = FileService.get_user_points(userId)
+        currentPoints = PointsService.get_user_points(userId)
 
         if userInput == "all":
             if currentPoints == 0:
@@ -43,7 +45,7 @@ async def start_lottery(message: Message):
         FileService.store_file_data(file_path, data)
 
         #Remove points
-        FileService.store_user_points(userId, currentPoints - poinstToGamble)
+        PointsService.store_user_points(userId, currentPoints - poinstToGamble)
 
         await update_lottery_message(message)
         await message.delete()
@@ -59,7 +61,7 @@ async def add_lottery_points(message: Message):
         userId = str(message.author.id)
         userInput = message.content.split(" ")[-1]
         poinstToGamble = 0
-        currentPoints = FileService.get_user_points(userId)
+        currentPoints = PointsService.get_user_points(userId)
 
         if userInput == "all":
             if currentPoints == 0:
@@ -78,7 +80,7 @@ async def add_lottery_points(message: Message):
 
         file_path = FileService.get_lottery_file_path()
         data = FileService.get_file_data(file_path)
-        entries = data["entries"]
+        entries: list[dict] = data["entries"]
 
         userEntryExists = False
         for userEntry in entries:
@@ -94,7 +96,7 @@ async def add_lottery_points(message: Message):
         data["entries"] = entries
         FileService.store_file_data(file_path, data)
 
-        FileService.store_user_points(userId, currentPoints - poinstToGamble)
+        PointsService.store_user_points(userId, currentPoints - poinstToGamble)
         await update_lottery_message(message)
         await message.delete()
     except:
@@ -137,8 +139,8 @@ async def end_lottery(message: Message):
     winnerId = random.choices(ids, weights=win_chances, k=1)[0]
 
     totalPoints = get_total_lottery_points(entries)
-    currentPoints = FileService.get_user_points(winnerId)
-    FileService.store_user_points(winnerId, currentPoints + totalPoints)
+    currentPoints = PointsService.get_user_points(winnerId)
+    PointsService.store_user_points(winnerId, currentPoints + totalPoints)
 
     FileService.store_file_data(file_path, {})
 

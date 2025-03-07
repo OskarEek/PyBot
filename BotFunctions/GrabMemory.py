@@ -4,20 +4,21 @@ import discord
 from discord import Message
 
 from Services import FileService
+from Services import MessageMemoryService
 from Models.MessageData import MessageData
 
 async def grab_memory(message: Message):
     print("==== " + message.author.name + " =============================")
     allowedUsers = [".eek", "kurkon", "luddelino", "popapea", "zyrbz", "sandin9", "ejctom", "gurkface"]
-    archiveFile = FileService.get_archive_filename(message.channel.id, message.created_at)
-    sentMessagesFile = FileService.get_channel_sent_filename(message.channel.id)
+    archiveFile = MessageMemoryService.get_archive_filename(message.channel.id, message.created_at)
+    sentMessagesFile = MessageMemoryService.get_channel_sent_filename(message.channel.id)
 
     numberOfFiles = FileService.count_items_in_folder(archiveFile)
     if numberOfFiles == 0:
         before = datetime(2017, 10, 20)
         async for x in message.channel.history(limit=None, before=before):
             messageData = MessageData(x.id, x.author.id, x.author.name, x.channel.id, len(x.attachments) > 0, x.created_at)
-            FileService.store_archive_message(messageData, FileService.get_archive_filename(x.channel.id, x.created_at))
+            MessageMemoryService.store_archive_message(messageData, MessageMemoryService.get_archive_filename(x.channel.id, x.created_at))
         
     numberOfFiles = FileService.count_items_in_folder(archiveFile)
     if numberOfFiles == 0:
@@ -28,12 +29,12 @@ async def grab_memory(message: Message):
     random_file = FileService.get_file_by_index(random_file_index, archiveFile)
 
 
-    messages = FileService.get_archive_messages(random_file)
+    messages = MessageMemoryService.get_archive_messages(random_file)
     random_message_index = random.randint(0, len(messages) - 1)
 
     dataMsg = messages[random_message_index]
 
-    sentMessagesIds = FileService.get_sent_messagesIds(sentMessagesFile)
+    sentMessagesIds = MessageMemoryService.get_sent_messagesIds(sentMessagesFile)
     nonAllowedMessageIds = sentMessagesIds
 
     i = 0
@@ -81,4 +82,4 @@ async def grab_memory(message: Message):
     #await msg.channel.send(botContent, reference=reference, files=[await x.to_file() for x in msg.attachments])
     await msg.channel.send(botContent, files=[await x.to_file() for x in msg.attachments])
 
-    FileService.store_sent_messageId(msg.id, sentMessagesFile)
+    MessageMemoryService.store_sent_messageId(msg.id, sentMessagesFile)

@@ -1,8 +1,8 @@
 import discord
 from discord import Message
-from BotFunctions.GrabMemory import grab_memory
+from BotFunctions import GrabMemory
 from BotFunctions import Gamble
-from BotFunctions.Random import randomizer
+from BotFunctions import Random
 from BotFunctions import Help
 from botToken import botToken
 from BotFunctions import Lottery
@@ -48,10 +48,10 @@ async def on_message(message: Message):
         await Gamble.leaderboard(message)
 
     if message.content.startswith('.grab-memory'):
-        await grab_memory(message)
+        await GrabMemory.grab_memory(message)
     
     if message.content.startswith('.random'):
-        await randomizer(message)
+        await Random.randomizer(message)
 
     if message.content.startswith('.help'):
         await Help.help(message)

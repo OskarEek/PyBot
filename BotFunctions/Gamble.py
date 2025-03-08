@@ -116,7 +116,7 @@ async def challange(message: Message):
             await message.channel.send(f"<@{opponentId}> has already challanged you to a bet, he bet you: {points} points")
             return
 
-        PointsService.store_challange(userId, opponentId=opponentId, points=pointsToGamble)
+        ChallangeService.store_challange(userId, opponentId=opponentId, points=pointsToGamble)
     except:
         await message.channel.send("Wrong syntax")
 

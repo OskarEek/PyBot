@@ -10,22 +10,19 @@ from Services import ChallangeService
 
 FREE_POINTS_COOLDOWN = 5 #Minutes
 
-async def free_points(message: Message):
+def free_points(message: Message):
     userId = str(message.author.id)
     currentPoints = PointsService.get_user_points(userId)
     currentTime = time.time()
 
     if currentPoints > 0:
-        await message.channel.send("You already have: " + str(currentPoints) + " points")
-        return
+        return "You already have: " + str(currentPoints) + " points"
 
     if user_in_lottery(userId):
-        await message.channel.send("You cant get free points while in a lottery")
-        return
+        return "You cant get free points while in a lottery"
 
     if user_in_roulette(userId):
-        await message.channel.send("You cant get free points while in a roulette")
-        return
+        return "You cant get free points while in a roulette"
     
     cooldowns = FileService.get_cooldowns()
     if not config.debug and userId in cooldowns:
@@ -34,21 +31,20 @@ async def free_points(message: Message):
             remaining_time = FREE_POINTS_COOLDOWN * 60 - time_since_last_use
             minutes = int(remaining_time // 60)
             seconds = int(remaining_time % 60)
-            await message.channel.send(f"You can claim free points again in {minutes} minutes and {seconds} seconds.")
-            return
+            return f"You can claim free points again in {minutes} minutes and {seconds} seconds."
 
     PointsService.store_user_points(userId, 500)
     cooldowns[userId] = currentTime
     FileService.save_cooldowns(cooldowns)
-    await message.channel.send("500 points were given to: " + message.author.global_name)
+    return "500 points were given to: " + message.author.global_name
 
-async def points(message: Message):
+def points(message: Message):
     userId = str(message.author.id)
     currentPoints = PointsService.get_user_points(userId)
     botContent = message.author.global_name + " has " + str(currentPoints) + " points."
     if currentPoints <= 0:
         botContent += "\n Run \".free-points\" to get some free points"
-    await message.channel.send(botContent)
+    return botContent
 
 async def gamble(message: Message):
     userId = str(message.author.id)

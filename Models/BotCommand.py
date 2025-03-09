@@ -22,7 +22,7 @@ class BotCommand:
 
     async def handle_result(self, result: Optional[str], message: Message):
         if result != None:
-            message.channel.send(result)
+            await message.channel.send(result)
 
 
 

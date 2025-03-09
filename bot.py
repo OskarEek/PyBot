@@ -20,6 +20,9 @@ async def on_message(message: Message):
     command = get_command(message.content)
     botCommand = botCommands[command]
 
+    if botCommand == None:
+        return
+
     await botCommand.execute(message)
     
 

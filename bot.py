@@ -18,16 +18,16 @@ async def on_message(message: Message):
         return
     
     command = get_command(message.content)
-    botCommand = botCommands[command]
 
-    if botCommand == None:
+    if command not in botCommands:
         return
 
+    botCommand = botCommands[command]
     await botCommand.execute(message)
     
 
 def get_command(messageContent: str) -> str:
-    result = messageContent.split(" ")[-1]
+    result = messageContent.split(" ")[0]
     return result if not result == None else ""
 
 client.run(botToken)

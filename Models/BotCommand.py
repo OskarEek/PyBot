@@ -40,4 +40,4 @@ class AsyncBotCommand(BotCommand):
 
     async def execute(self, message):
         result = await self.asyncOperation(message)
-        await self.handle_result(result)
+        await self.handle_result(result, message)

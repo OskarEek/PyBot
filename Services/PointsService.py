@@ -1,9 +1,11 @@
 import json
 
+import config
 from Services import FileService
 
 
-FILE_PATH = FileService.get_base_file_path() + "/Gamble/userpoints.json"
+FILE_PATH = FileService.get_base_file_path() + ("/Gamble/userpoints.json" if not config.debug else "/Gamble/userpointsDebug.json")
+
 
 def get_user_points(userId: str) -> int:
     if FileService.create_file_if_not_exists(FILE_PATH, {}):

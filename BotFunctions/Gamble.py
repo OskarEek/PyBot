@@ -3,13 +3,12 @@ from discord import Message
 import random
 import time
 
+import config
 from Services import FileService
 from Services import PointsService
 from Services import ChallangeService
 
 FREE_POINTS_COOLDOWN = 5 #Minutes
-
-TEST = False
 
 async def free_points(message: Message):
     userId = str(message.author.id)
@@ -29,7 +28,7 @@ async def free_points(message: Message):
         return
     
     cooldowns = FileService.get_cooldowns()
-    if not TEST and userId in cooldowns:
+    if not config.debug and userId in cooldowns:
         time_since_last_use = currentTime - cooldowns[userId]
         if time_since_last_use < FREE_POINTS_COOLDOWN * 60:  # 15 minutes in seconds
             remaining_time = FREE_POINTS_COOLDOWN * 60 - time_since_last_use
@@ -93,6 +92,9 @@ async def challange(message: Message):
     try:
         opponentId = userInputs[1].replace("@", "").replace(">", "").replace("<", "")
         pointsToGambleInput = userInputs[2]
+
+        if not config.debug and userId == opponentId:
+            raise Exception("You cannot challange yourself")
 
         currentPoints = PointsService.get_user_points(userId)
 

@@ -1,12 +1,7 @@
 import discord
 from discord import Message
-from BotFunctions.GrabMemory import grab_memory
-from BotFunctions import Gamble
-from BotFunctions.Random import randomizer
-from BotFunctions import Help
 from botToken import botToken
-from BotFunctions import Lottery
-from BotFunctions import Roulette
+from botCommands import botCommands
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -21,55 +16,19 @@ async def on_ready():
 async def on_message(message: Message):
     if message.author.bot:
         return
-
-    if message.content.startswith('.test'):
-        print(message.author)
-        await message.channel.send("Working")
     
-    if message.content.startswith('.expose'):
-        pass
+    command = get_command(message.content)
 
-    if message.content.startswith('.free-points'):
-        await Gamble.free_points(message)
+    if command not in botCommands:
+        return
 
-    if message.content.startswith('.gamble'):
-        await Gamble.gamble(message)
-
-    if message.content.startswith('.points'):
-        await Gamble.points(message)
-
-    if message.content.startswith('.challenge'):
-        await Gamble.challange(message)
-
-    if message.content.startswith('.respond'):
-        await Gamble.respond_challange(message)
-
-    if message.content.startswith('.leaderboard'):
-        await Gamble.leaderboard(message)
-
-    if message.content.startswith('.grab-memory'):
-        await grab_memory(message)
+    botCommand = botCommands[command]
+    await botCommand.execute(message)
     
-    if message.content.startswith('.random'):
-        await randomizer(message)
 
-    if message.content.startswith('.help'):
-        await Help.help(message)
-
-    if message.content.startswith('.lottery'):
-        await Lottery.start_lottery(message)
-    
-    if message.content.startswith('.enter'):
-        await Lottery.add_lottery_points(message)
-
-    if message.content.startswith('.end-lottery'):
-        await Lottery.end_lottery(message)
-
-    if message.content.startswith('.roulette'):
-        await Roulette.roulette(message)
-    
-    if message.content.startswith('.end-roulette'):
-        await Roulette.end_roulette(message)
-    
+def get_command(messageContent: str) -> str:
+    result = messageContent.split(" ")[0]
+    return result if not result == None else ""
 
 client.run(botToken)
+

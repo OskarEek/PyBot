@@ -2,6 +2,7 @@ from discord import Message
 import random
 import time
 from Services import FileService
+from Services import PointsService
 from datetime import datetime, timedelta
 
 WIDTH = 7 
@@ -21,7 +22,7 @@ async def roulette(message: Message):
             raise Exception("Invalid input")
 
         pointsToGamble = 0
-        currentPoints = FileService.get_user_points(userId)
+        currentPoints = PointsService.get_user_points(userId)
 
         if points == "all":
             if currentPoints == 0:
@@ -43,7 +44,7 @@ async def roulette(message: Message):
         else:
             file_path = FileService.get_roulette_file_path()
             data = FileService.get_file_data(file_path)
-            entries = data["entries"]
+            entries: list[dict] = data["entries"]
 
             userEntryExists = False
             for userEntry in entries:
@@ -58,7 +59,7 @@ async def roulette(message: Message):
             data["entries"] = entries
             FileService.store_file_data(file_path, data)
 
-        FileService.store_user_points(userId, currentPoints - pointsToGamble)
+        PointsService.store_user_points(userId, currentPoints - pointsToGamble)
         await message.delete()
         await update_roulette_message(message)
     except:
@@ -157,8 +158,8 @@ async def end_roulette(message: Message):
         username = entry["username"]
         points = entry["points"]
         result = points * 2 if winColor != "green" else points * 14
-        currentPoints = FileService.get_user_points(userId)
-        FileService.store_user_points(userId, currentPoints + result)
+        currentPoints = PointsService.get_user_points(userId)
+        PointsService.store_user_points(userId, currentPoints + result)
         winMessage += f"    {username} won {result} points\n"
 
     await message.channel.send(winMessage)

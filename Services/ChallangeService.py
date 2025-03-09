@@ -7,7 +7,7 @@ FILE_PATH = FileService.get_base_file_path() + "/Gamble/challanges.json"
 def store_challange(creatorId: str, opponentId: str, points: int):
     FileService.create_file_if_not_exists(FILE_PATH, {})
 
-    with open(file, 'r') as f:
+    with open(FILE_PATH, 'r') as f:
         data = json.load(f)
 
     challanges = []

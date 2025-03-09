@@ -110,7 +110,7 @@ async def challange(message: Message):
             await message.channel.send(f"You dont have enough points ({currentPoints})")
             return
 
-        existingChallange = PointsService.get_challange(opponentId=userId, creatorId=opponentId)
+        existingChallange = ChallangeService.get_challange(opponentId=userId, creatorId=opponentId)
         if existingChallange != None:
             points = existingChallange['points']
             await message.channel.send(f"<@{opponentId}> has already challanged you to a bet, he bet you: {points} points")

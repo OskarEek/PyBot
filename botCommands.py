@@ -18,7 +18,7 @@ botCommands: dict[str, BotCommand] = {
     ".help": BotCommand(".help", "", Help.help),
     ".lottery": AsyncBotCommand(".lottery", "", Lottery.start_lottery),
     ".enter": AsyncBotCommand(".enter", "", Lottery.add_lottery_points),
-    ".end-lottery": AsyncBotCommand(".end-lottery", "", Lottery.end_lottery),
+    ".end-lottery": BotCommand(".end-lottery", "", Lottery.end_lottery),
     ".roulette": AsyncBotCommand(".roulette", "", Roulette.roulette),
     ".end-roulette": AsyncBotCommand(".end-roulette", "", Roulette.end_roulette),
 }

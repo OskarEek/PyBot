@@ -38,7 +38,7 @@ def free_points(message: Message):
     FileService.save_cooldowns(cooldowns)
     return "500 points were given to: " + message.author.global_name
 
-def points(message: Message):
+def points(message: Message) -> str:
     userId = str(message.author.id)
     currentPoints = PointsService.get_user_points(userId)
     botContent = message.author.global_name + " has " + str(currentPoints) + " points."
@@ -46,7 +46,7 @@ def points(message: Message):
         botContent += "\n Run \".free-points\" to get some free points"
     return botContent
 
-def gamble(message: Message):
+def gamble(message: Message) -> str:
     userId = str(message.author.id)
     try:
         userInput = message.content.split(" ")[-1]
@@ -79,7 +79,7 @@ def gamble(message: Message):
         return "Wrong syntax"
 
 
-def challange(message: Message):
+def challange(message: Message) -> str:
     userId = str(message.author.id)
     userInputs = message.content.split(" ")
     try:
@@ -112,7 +112,7 @@ def challange(message: Message):
     except:
         return "Wrong syntax"
 
-def respond_challange(message: Message):
+def respond_challange(message: Message) -> str:
     userId = str(message.author.id)
     userInputs = message.content.split(" ")
 

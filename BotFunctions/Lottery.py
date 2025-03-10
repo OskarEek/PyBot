@@ -103,10 +103,9 @@ async def add_lottery_points(message: Message):
         await message.channel.send("Wrong syntax")
 
 
-async def end_lottery(message: Message):
+def end_lottery(message: Message) -> str:
     if not ongoing_lottery():
-        await message.channel.send("There is no ongoing lottery")
-        return
+        return "There is no ongoing lottery"
     
     userId = str(message.author.id)
     file_path = FileService.get_lottery_file_path()
@@ -129,13 +128,11 @@ async def end_lottery(message: Message):
 
     if creatorId != userId:
         if minutes != 0 and seconds != 0:
-            await message.channel.send(f"Only the creator can end this lottery early.\n Anybody will be able to end the lottery after: {minutes} minutes and {seconds} seconds")
-            return
+            return f"Only the creator can end this lottery early.\n Anybody will be able to end the lottery after: {minutes} minutes and {seconds} seconds"
 
     entries = data["entries"]
     ids = [userEntry["userId"] for userEntry in entries]
     win_chances = [userEntry["winChance"] for userEntry in entries]
-    print("Combined win chances: " + str(sum(win_chances)))
     winnerId = random.choices(ids, weights=win_chances, k=1)[0]
 
     totalPoints = get_total_lottery_points(entries)
@@ -146,11 +143,17 @@ async def end_lottery(message: Message):
 
     i = ids.index(winnerId)
     winChance = win_chances[i] * 100
-    botContent = f"<@{winnerId}> is the winner of the Lottery with a win percentage of {winChance}%!\nTotal: {totalPoints} points"
-    await message.channel.send(botContent)
+    return f"<@{winnerId}> is the winner of the Lottery with a win percentage of {winChance}%!\nTotal: {totalPoints} points"
 
 
 
+
+
+
+
+
+
+#=====Helper functions==========================================
 def calculate_winchance_percentages(entries: list):
     totalPoints = get_total_lottery_points(entries)
     for userEntry in entries:

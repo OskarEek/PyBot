@@ -10,22 +10,19 @@ from Services import ChallangeService
 
 FREE_POINTS_COOLDOWN = 5 #Minutes
 
-async def free_points(message: Message):
+def free_points(message: Message):
     userId = str(message.author.id)
     currentPoints = PointsService.get_user_points(userId)
     currentTime = time.time()
 
     if currentPoints > 0:
-        await message.channel.send("You already have: " + str(currentPoints) + " points")
-        return
+        return "You already have: " + str(currentPoints) + " points"
 
     if user_in_lottery(userId):
-        await message.channel.send("You cant get free points while in a lottery")
-        return
+        return "You cant get free points while in a lottery"
 
     if user_in_roulette(userId):
-        await message.channel.send("You cant get free points while in a roulette")
-        return
+        return "You cant get free points while in a roulette"
     
     cooldowns = FileService.get_cooldowns()
     if not config.debug and userId in cooldowns:
@@ -34,23 +31,22 @@ async def free_points(message: Message):
             remaining_time = FREE_POINTS_COOLDOWN * 60 - time_since_last_use
             minutes = int(remaining_time // 60)
             seconds = int(remaining_time % 60)
-            await message.channel.send(f"You can claim free points again in {minutes} minutes and {seconds} seconds.")
-            return
+            return f"You can claim free points again in {minutes} minutes and {seconds} seconds."
 
     PointsService.store_user_points(userId, 500)
     cooldowns[userId] = currentTime
     FileService.save_cooldowns(cooldowns)
-    await message.channel.send("500 points were given to: " + message.author.global_name)
+    return "500 points were given to: " + message.author.global_name
 
-async def points(message: Message):
+def points(message: Message) -> str:
     userId = str(message.author.id)
     currentPoints = PointsService.get_user_points(userId)
     botContent = message.author.global_name + " has " + str(currentPoints) + " points."
     if currentPoints <= 0:
         botContent += "\n Run \".free-points\" to get some free points"
-    await message.channel.send(botContent)
+    return botContent
 
-async def gamble(message: Message):
+def gamble(message: Message) -> str:
     userId = str(message.author.id)
     try:
         userInput = message.content.split(" ")[-1]
@@ -59,34 +55,31 @@ async def gamble(message: Message):
 
         if userInput == "all":
             if currentPoints == 0:
-                await message.channel.send("You dont have any points to gamble")
-                return
+                return "You dont have any points to gamble"
             poinstToGamble = currentPoints
         else:
             poinstToGamble = int(userInput)
 
         if poinstToGamble <= 0:
-            raise Exception("Invalid value")
+            return "You did not enter a valid amount"
 
         if currentPoints < poinstToGamble:
-            await message.channel.send(f"You dont have enough points ({currentPoints})")
-            return
+            return f"You dont have enough points ({currentPoints})"
 
         x = random.randint(0, 1)
         if x == 1:
             result = currentPoints + poinstToGamble
             PointsService.store_user_points(userId, result)
-            await message.channel.send(f"{message.author.global_name} won {poinstToGamble}!, he now have {result} points")
+            return f"{message.author.global_name} won {poinstToGamble}!, he now have {result} points"
         else:
             result = currentPoints - poinstToGamble
             PointsService.store_user_points(userId, result)
-            await message.channel.send(f"{message.author.global_name} lost {poinstToGamble} points, he now have {result} points")
-
+            return f"{message.author.global_name} lost {poinstToGamble} points, he now have {result} points"   
     except:
-        await message.channel.send("You did not enter a valid amount")
+        return "Wrong syntax"
 
 
-async def challange(message: Message):
+def challange(message: Message) -> str:
     userId = str(message.author.id)
     userInputs = message.content.split(" ")
     try:
@@ -94,35 +87,32 @@ async def challange(message: Message):
         pointsToGambleInput = userInputs[2]
 
         if not config.debug and userId == opponentId:
-            raise Exception("You cannot challange yourself")
+            return "You cannot challange yourself"
 
         currentPoints = PointsService.get_user_points(userId)
 
         pointsToGamble = 0
         if currentPoints == 0:
-            await message.channel.send("You dont have any points to gamble")
-            return
+            return "You dont have any points to gamble"
         else:
             pointsToGamble = int(pointsToGambleInput)
 
         if pointsToGamble <= 0:
-            raise Exception("Invalid value")
+            return "You did not enter a valid amount"
 
         if currentPoints < pointsToGamble:
-            await message.channel.send(f"You dont have enough points ({currentPoints})")
-            return
+            return f"You dont have enough points ({currentPoints})"
 
         existingChallange = ChallangeService.get_challange(opponentId=userId, creatorId=opponentId)
         if existingChallange != None:
             points = existingChallange['points']
-            await message.channel.send(f"<@{opponentId}> has already challanged you to a bet, he bet you: {points} points")
-            return
+            return f"<@{opponentId}> has already challanged you to a bet, he bet you: {points} points"
 
         ChallangeService.store_challange(userId, opponentId=opponentId, points=pointsToGamble)
     except:
-        await message.channel.send("Wrong syntax")
+        return "Wrong syntax"
 
-async def respond_challange(message: Message):
+def respond_challange(message: Message) -> str:
     userId = str(message.author.id)
     userInputs = message.content.split(" ")
 
@@ -134,52 +124,48 @@ async def respond_challange(message: Message):
 
         pointsToGamble = 0
         if currentPoints == 0:
-            await message.channel.send("You dont have any points to gamble")
-            return
+            return "You dont have any points to gamble"
         else:
             pointsToGamble = int(pointsToGambleInput)
 
         if pointsToGamble <= 0:
-            raise Exception("Invalid value")
+            return "You did not enter a valid amount"
 
         if currentPoints < pointsToGamble:
-            await message.channel.send(f"You dont have enough points ({currentPoints})")
-            return
+            return f"You dont have enough points ({currentPoints})"
 
         challange = ChallangeService.get_challange(userId, creatorId=creatorId)
-
         if challange == None:
-            await message.channel.send(f"<@{creatorId}> has not challanged you to any bets")
-            return
+            return f"<@{creatorId}> has not challanged you to any bets"
 
         creatorPointsToGamble = challange['points']
         creatorCurrentPoints = PointsService.get_user_points(creatorId)
 
         if creatorCurrentPoints < creatorPointsToGamble:
-            await message.channel.send(f"This bet is no longer available, <@{creatorId}> bet {creatorPointsToGamble} points but only has {creatorCurrentPoints} right now.")
             ChallangeService.remove_challange(userId, creatorId=creatorId)
-            return
+            return f"This bet is no longer available, <@{creatorId}> bet {creatorPointsToGamble} points but only has {creatorCurrentPoints} right now."
 
         totalPoints = creatorPointsToGamble + pointsToGamble
         winChance = (pointsToGamble / totalPoints) * 100
         x = random.randint(0, 99)
+        returnMessage: str
         if x < winChance:
            result = currentPoints + creatorPointsToGamble
            creatorResult = creatorCurrentPoints - creatorPointsToGamble
            PointsService.store_user_points(userId, result)
            PointsService.store_user_points(creatorId, creatorResult)
-           await message.channel.send(f"<@{userId}> wins {creatorPointsToGamble} points from <@{creatorId}> with a win chance of {winChance}%")
+           returnMessage = f"<@{userId}> wins {creatorPointsToGamble} points from <@{creatorId}> with a win chance of {winChance}%"
         else:
            result = currentPoints - pointsToGamble
            creatorResult = creatorCurrentPoints + pointsToGamble
            PointsService.store_user_points(userId, result)
            PointsService.store_user_points(creatorId, creatorResult)
-           await message.channel.send(f"<@{creatorId}> wins {pointsToGamble} points from <@{userId}> with a win chance of {100 - winChance}%")
+           returnMessage = f"<@{creatorId}> wins {pointsToGamble} points from <@{userId}> with a win chance of {100 - winChance}%"
            
-
         ChallangeService.remove_challange(userId, creatorId=creatorId)
+        return returnMessage
     except:
-        await message.channel.send("Wrong syntax")
+        return "Wrong syntax"
         
 
 async def leaderboard(message: Message):
@@ -193,6 +179,14 @@ async def leaderboard(message: Message):
 
     await message.channel.send(content)
 
+
+
+
+
+
+
+
+#======Helper functions=====================================================
 def user_in_lottery(userId: str):
     file_path = FileService.get_lottery_file_path()
     data = FileService.get_file_data(file_path)

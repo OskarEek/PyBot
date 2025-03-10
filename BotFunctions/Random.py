@@ -3,14 +3,14 @@ from discord import Message
 import random
 
 
-async def randomizer(message: Message):
+def randomizer(message: Message) -> str:
 
     phrases = message.content[len('.random'):].split(',')
     phrases = [phrase.strip() for phrase in phrases if phrase.strip()]
 
     if phrases:
         chosen_phrase = random.choice(phrases)
-        await message.channel.send(f'{chosen_phrase}')
+        return f'{chosen_phrase}'
 
     else:
-        await message.channel.send('Write something after .random.')
+        return 'Write something after .random.'

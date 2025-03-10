@@ -1,6 +1,6 @@
 from discord import Message
 
-async def help(message: Message):
+async def help(message: Message) -> str:
     helpMessage = [
         "\n"
         "__**Commands**__\n",
@@ -23,5 +23,4 @@ async def help(message: Message):
         "       .end-lottery"
     ]
 
-    botContent = "".join(helpMessage)
-    await message.channel.send(botContent)
+    return "".join(helpMessage)

@@ -1,4 +1,3 @@
-import discord
 from discord import Message
 import random
 import time
@@ -7,6 +6,8 @@ import config
 from Services import FileService
 from Services import PointsService
 from Services import ChallangeService
+from Services import UserInputService
+from Models.UserInput import UserIdInput, PointsInput
 
 FREE_POINTS_COOLDOWN = 5 #Minutes
 
@@ -81,27 +82,18 @@ def gamble(message: Message) -> str:
 
 def challange(message: Message) -> str:
     userId = str(message.author.id)
-    userInputs = message.content.split(" ")
     try:
-        opponentId = userInputs[1].replace("@", "").replace(">", "").replace("<", "")
-        pointsToGambleInput = userInputs[2]
-
-        if not config.debug and userId == opponentId:
-            return "You cannot challange yourself"
-
         currentPoints = PointsService.get_user_points(userId)
 
-        pointsToGamble = 0
-        if currentPoints == 0:
-            return "You dont have any points to gamble"
-        else:
-            pointsToGamble = int(pointsToGambleInput)
-
-        if pointsToGamble <= 0:
-            return "You did not enter a valid amount"
-
-        if currentPoints < pointsToGamble:
-            return f"You dont have enough points ({currentPoints})"
+        inputs = [UserIdInput(message), PointsInput(currentPoints)]
+        result = UserInputService.get_user_input(message.content, inputs)
+        inputs = result.userInputs
+        
+        if result.validationError != None:
+            return result.validationError
+        
+        opponentId = inputs[0].get_value()
+        pointsToGamble = inputs[1].get_value()
 
         existingChallange = ChallangeService.get_challange(opponentId=userId, creatorId=opponentId)
         if existingChallange != None:

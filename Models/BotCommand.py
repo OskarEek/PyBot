@@ -1,5 +1,6 @@
 from discord import Message
 from typing import Callable, Optional, Awaitable
+import traceback
 
 class BotCommand:
     command: str
@@ -17,7 +18,13 @@ class BotCommand:
         self.explanation = explanation
 
     async def execute(self, message: Message):
-        result = self.operation(message)
+        result: str
+        try:
+            result = self.operation(message)
+        except Exception as e: 
+            print(e)
+            traceback.print_exc()
+            result = "Something went wrong"
         await self.handle_result(result, message)
 
     async def handle_result(self, result: Optional[str], message: Message):
@@ -39,5 +46,11 @@ class AsyncBotCommand(BotCommand):
         self.asyncOperation = operation
 
     async def execute(self, message):
-        result = await self.asyncOperation(message)
+        result: str
+        try:
+            result = await self.asyncOperation(message)
+        except Exception as e: 
+            print(e)
+            traceback.print_exc()
+            result = "Something went wrong"
         await self.handle_result(result, message)

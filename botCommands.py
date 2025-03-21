@@ -5,6 +5,7 @@ from BotFunctions import Random
 from BotFunctions import Help
 from BotFunctions import Lottery
 from BotFunctions import Roulette
+from BotFunctions import Invest
 
 botCommands: dict[str, BotCommand] = {
     ".free-points": BotCommand(".free-points", "Gives user 500 free points", Gamble.free_points),
@@ -21,4 +22,7 @@ botCommands: dict[str, BotCommand] = {
     ".end-lottery": BotCommand(".end-lottery", "", Lottery.end_lottery),
     ".roulette": AsyncBotCommand(".roulette", "", Roulette.roulette),
     ".end-roulette": AsyncBotCommand(".end-roulette", "", Roulette.end_roulette),
+    ".invest": BotCommand(".invest", "", Invest.invest),
+    ".get-investment": BotCommand(".get-investment", "", Invest.get_investment),
+    ".sell-investment": BotCommand(".sell-investment", "", Invest.sell_investment)
 }

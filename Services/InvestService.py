@@ -12,11 +12,9 @@ from Services import FileService
 FILE_PATH = FileService.get_base_file_path() + "/Investments/investments.json"
 
 def store_new_investment(userId: str, newInvestment: InvestmentModel):
-    FileService.create_file_if_not_exists(FILE_PATH, {})
-
-    with open(FILE_PATH, 'r') as f:
-        data = json.load(f)
-
+    data = FileService.get_file_data(FILE_PATH) 
+    data = data if data != None else {}
+    
     investments = []
     if userId in data:
         investments = data[userId]
@@ -51,12 +49,11 @@ def store_new_investment(userId: str, newInvestment: InvestmentModel):
     
     data[userId] = investments
 
-    with open(FILE_PATH, 'w') as f:
-        json.dump(data, f)
+    FileService.store_file_data(FILE_PATH, data)
 
 def get_investment(userId: str, ticker: str) -> Optional[InvestmentStorageModel]:
-    with open(FILE_PATH, 'r') as f:
-        data = json.load(f)
+    data = FileService.get_file_data(FILE_PATH)
+    data = data if data != None else {}
 
     investments = []
     if userId in data:
@@ -73,6 +70,32 @@ def get_investment(userId: str, ticker: str) -> Optional[InvestmentStorageModel]
 
     return investment
 
+def remove_investment(userId: str, ticker: str):
+    data = FileService.get_file_data(FILE_PATH) 
+    data = data if data != None else {}
+
+    investments = []
+    if userId in data:
+        investments = data[userId]
+    
+    if len(investments) == None:
+        return
+    
+    index: Optional[int] = None
+    i = 0
+    for d in investments:
+        x = InvestmentStorageModel.from_dict(data=d)
+        if x.ticker == ticker:
+            index = i
+        i += 1
+    
+    if index == None:
+        return
+
+    investments.pop(index)
+    data[userId] = investments
+
+    FileService.store_file_data(FILE_PATH, data)
 
 
 

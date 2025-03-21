@@ -46,6 +46,8 @@ def invest(message: Message):
 
     InvestService.store_new_investment(userId, investment)
     
+    PointsService.store_user_points(userId, currentPoints - pointsToInvest)
+    
     return f"You invested {str(pointsToInvest)} points in {ticker} at ${"{:.2f}".format(stockPrice)}, {certType} x{str(multiplier)}"
 
 
@@ -73,7 +75,42 @@ def get_investment(message: Message):
 
     result = investment.calculate_change(stockPrice)
 
-    return f"Your investment: {ticker.upper()} {investment.certType} X{str(investment.multiplier)}\nCurrent value: {result["points"]}, Percentage Change: {result["percent"] * 100:.2f}%, Invested: {str(investment.totalPointsInvested)}"
+    return f"Your investment: {ticker.upper()} {investment.certType} X{investment.multiplier}\nStock price: ${stockPrice:.2f}\nInvested: {investment.totalPointsInvested}, Buy price: ${investment.averageBuyPrice:.2f}\nCurrent value: {result["points"]}, Percentage Change: {result["percent"] * 100:.2f}%"
+
+
+
+
+def sell_investment(message: Message):
+    userId = str(message.author.id)
+    inputs = [StringInput()] #ticker
+
+    result = UserInputService.get_user_input(message.content, inputs)
+    if result.validationError != None:
+        return result.validationError
+
+    ticker: str = result.userInputs[0].get_value()
+    ticker = ticker.upper()
+
+    investment = InvestService.get_investment(userId, ticker)
+
+    if investment == None:
+        return f"You have no investment in {ticker}"
+
+    stockHandler = StockHandler(ticker)
+    stockPrice = stockHandler.get_price()
+    
+    if stockPrice == None:
+        return "That ticker does not seem to exist"
+
+    result = investment.calculate_change(stockPrice)
+
+    points = PointsService.get_user_points(userId)
+    points += result["points"]
+    PointsService.store_user_points(userId, points)
+
+    InvestService.remove_investment(userId, ticker)
+
+    return f"Sold: {ticker.upper()} {investment.certType} X{investment.multiplier}\nStock price: ${stockPrice:.2f}\nInvested: {investment.totalPointsInvested}, Buy price: ${investment.averageBuyPrice:.2f}\nCurrent value: {result["points"]}, Percentage Change: {result["percent"] * 100:.2f}%\nResult: {result["difference"]}"
 
 
 

@@ -3,6 +3,7 @@ class InvestmentStorageModel():
     ticker: str
     totalPointsInvested: int
     ownedShares: float
+    averageBuyPrice: float
     certType: str
     multiplier: int
 
@@ -10,37 +11,51 @@ class InvestmentStorageModel():
         self.ticker = ticker.upper()
         self.totalPointsInvested = 0
         self.ownedShares = 0
+        self.averageBuyPrice = 0
         self.certType = certType.upper()
         self.multiplier = multiplier
 
     def add_new_investment(self, points: int, stockPrice: float):
-        self.totalPointsInvested += points
-        self.ownedShares += points / stockPrice
-
+        if self.totalPointsInvested == 0:
+            #First investment
+            self.averageBuyPrice = stockPrice
+            self.totalPointsInvested += points
+            self.ownedShares += points / stockPrice
+        else:
+            newShares = points / stockPrice
+            self.ownedShares += newShares
+            self.totalPointsInvested += points
+            self.averageBuyPrice = self.totalPointsInvested / self.ownedShares
+            
     def calculate_change(self, currentStockPrice) -> dict:
         # Determine direction based on certType
         direction = 1 if self.certType == "BULL" else -1  # Bull = 1, Bear = -1
-
-        # Calculate total points considering the leverage and direction
-        totalPoints = int((currentStockPrice * self.multiplier * direction) * self.ownedShares)
-
-        # Calculate the difference in points
-        pointsDifference = totalPoints - self.totalPointsInvested
-
-        # Prevent division by zero
-        percentChange = (pointsDifference / self.totalPointsInvested) if self.totalPointsInvested else 0
-
-        return {
-            "points": totalPoints,
-            "percent": percentChange
-        }
         
+        # Calculate percentage change in stock price from average buy price
+        stockPricePercentChange = (currentStockPrice - self.averageBuyPrice) / self.averageBuyPrice if self.averageBuyPrice else 0
+        
+        # Apply multiplier to the percentage change
+        investmentPercentChange = stockPricePercentChange * self.multiplier * direction
+        
+        # Calculate the current total points
+        totalPoints = self.totalPointsInvested * (1 + investmentPercentChange)
+        
+        # Calculate the difference in points
+        pointsDifference = int(totalPoints - self.totalPointsInvested)
+        
+        return {
+            "points": int(totalPoints),
+            "percent": investmentPercentChange,
+            "difference": pointsDifference
+        }
+
 
     def to_dict(self):
         return {
             "ticker": self.ticker,
             "totalPointsInvested": self.totalPointsInvested,
             "ownedShares": self.ownedShares,
+            "averageBuyPrice": self.averageBuyPrice,
             "certType": self.certType,
             "multiplier": self.multiplier
         }
@@ -55,4 +70,5 @@ class InvestmentStorageModel():
         #Following need to be assigned separately since they're not able to be set in constructor
         obj.totalPointsInvested = data.get('totalPointsInvested', 0)
         obj.ownedShares = data.get('ownedShares', 0)
+        obj.averageBuyPrice = data.get('averageBuyPrice', 0)
         return obj

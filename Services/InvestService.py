@@ -15,9 +15,7 @@ def store_new_investment(userId: str, newInvestment: InvestmentModel):
     data = FileService.get_file_data(FILE_PATH) 
     data = data if data != None else {}
     
-    investments = []
-    if userId in data:
-        investments = data[userId]
+    investments: list = data.get(userId, [])
     
     investment: Optional[InvestmentStorageModel] = None
     index: Optional[int] = None

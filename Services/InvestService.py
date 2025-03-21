@@ -55,47 +55,34 @@ def get_investment(userId: str, ticker: str) -> Optional[InvestmentStorageModel]
     data = FileService.get_file_data(FILE_PATH)
     data = data if data != None else {}
 
-    investments = []
-    if userId in data:
-        investments = data[userId]
+    investments = data.get(userId, [])
     
     if len(investments) == 0:
         return None
     
-    investment: Optional[InvestmentStorageModel] = None
     for d in investments:
         storedInvestment = InvestmentStorageModel.from_dict(data=d)
         if storedInvestment.ticker == ticker.upper():
-            investment = storedInvestment
+            return storedInvestment
 
-    return investment
+    return None
 
 def remove_investment(userId: str, ticker: str):
     data = FileService.get_file_data(FILE_PATH) 
     data = data if data != None else {}
 
-    investments = []
-    if userId in data:
-        investments = data[userId]
+    investments: list = data.get(userId, [])
     
     if len(investments) == None:
         return
     
-    index: Optional[int] = None
-    i = 0
-    for d in investments:
-        x = InvestmentStorageModel.from_dict(data=d)
-        if x.ticker == ticker:
-            index = i
-        i += 1
-    
-    if index == None:
-        return
-
-    investments.pop(index)
-    data[userId] = investments
-
-    FileService.store_file_data(FILE_PATH, data)
+    for i, investment_dict in enumerate(investments):
+        x = InvestmentStorageModel.from_dict(data=investment_dict)
+        if x.ticker == ticker.upper():
+            investments.pop(i)
+            data[userId] = investments
+            FileService.store_file_data(FILE_PATH, data)
+            return
 
 
 

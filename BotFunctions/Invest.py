@@ -1,6 +1,6 @@
 from discord import Message
 
-from StockApi.StockService import StockHandler
+from StockApi.StockApiService import StockHandler
 from Models.UserInput import PointsInput, StringInput, IntegerInput
 from Models.InvestmentModel import InvestmentModel
 

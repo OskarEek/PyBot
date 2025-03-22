@@ -1,19 +1,12 @@
-from discord import Message
-
-
-from Services import PointsService
 from Models.UserInput import UserInput
-from Models.UserInputResult import UserInputResult
 
-
-def get_user_input(messageContent: str, typesInOrder: list[UserInput]) -> UserInputResult:
+#If not handled in a unique way, ValueErrors raised by this function will be catched in the BotCommand.execute function
+def get_user_input(messageContent: str, typesInOrder: list[UserInput]) -> list[UserInput]:
     messageInputs = messageContent.split(" ")
     del messageInputs[0]
-    result = UserInputResult()
 
     if len(typesInOrder) != len(messageInputs):
-        result.validationError = "Wrong syntax"
-        return result
+        raise ValueError("Wrong syntax")
 
     userInputs = []
     i = 0
@@ -23,17 +16,14 @@ def get_user_input(messageContent: str, typesInOrder: list[UserInput]) -> UserIn
         try:
             inputType.input(userInput)
         except:
-            result.validationError = "Wrong Syntax"
-            return result
+            raise ValueError("Wrong syntax")
 
         validationError = inputType.validate()
 
         if validationError != None:
-            result.validationError = validationError
-            return result
+            raise ValueError(validationError)
         
         userInputs.append(inputType)
         i += 1
 
-    result.userInputs = userInputs
-    return result
+    return userInputs

@@ -82,27 +82,20 @@ def gamble(message: Message) -> str:
 
 def challange(message: Message) -> str:
     userId = str(message.author.id)
-    try:
-        currentPoints = PointsService.get_user_points(userId)
 
-        inputs = [UserIdInput(), PointsInput(currentPoints)]
-        result = UserInputService.get_user_input(message.content, inputs)
-        inputs = result.userInputs
-        
-        if result.validationError != None:
-            return result.validationError
-        
-        opponentId = inputs[0].get_value()
-        pointsToGamble = inputs[1].get_value()
+    currentPoints = PointsService.get_user_points(userId)
 
-        existingChallange = ChallangeService.get_challange(opponentId=userId, creatorId=opponentId)
-        if existingChallange != None:
-            points = existingChallange['points']
-            return f"<@{opponentId}> has already challanged you to a bet, he bet you: {points} points"
+    inputs = [UserIdInput(), PointsInput(currentPoints)]
+    inputs = UserInputService.get_user_input(message.content, inputs)
+    opponentId = inputs[0].get_value()
+    pointsToGamble = inputs[1].get_value()
 
-        ChallangeService.store_challange(userId, opponentId=opponentId, points=pointsToGamble)
-    except:
-        return "Wrong syntax"
+    existingChallange = ChallangeService.get_challange(opponentId=userId, creatorId=opponentId)
+    if existingChallange != None:
+        points = existingChallange['points']
+        return f"<@{opponentId}> has already challanged you to a bet, he bet you: {points} points"
+
+    ChallangeService.store_challange(userId, opponentId=opponentId, points=pointsToGamble)
 
 def respond_challange(message: Message) -> str:
     userId = str(message.author.id)

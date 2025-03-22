@@ -2,55 +2,41 @@ from discord import Message
 from datetime import datetime, timedelta
 import random
 
+from Models.UserInput import PointsInput
+
 from Services import FileService
 from Services import PointsService
+from Services import UserInputService
 
 async def start_lottery(message: Message):
     if ongoing_lottery():
-        await message.channel.send("There is already an ongoing lottery")
         await message.delete()
-        return
+        return "There is already an ongoing lottery"
 
-    try:
-        userId = str(message.author.id)
-        userInput = message.content.split(" ")[-1]
-        poinstToGamble = 0
-        currentPoints = PointsService.get_user_points(userId)
+    userId = str(message.author.id)
+    currentPoints = PointsService.get_user_points(userId)
 
-        if userInput == "all":
-            if currentPoints == 0:
-                await message.channel.send("You dont have any points to gamble")
-                return
-            poinstToGamble = currentPoints
-        else:
-            poinstToGamble = int(userInput)
+    inputs = [PointsInput(currentPoints)]
+    inputs = UserInputService.get_user_input(message.content, inputs)
+    poinstToGamble = inputs[0].get_value()
 
-        if poinstToGamble <= 0:
-            raise Exception("Invalid value")
+    file_path = FileService.get_lottery_file_path()
 
-        if currentPoints < poinstToGamble:
-            await message.channel.send(f"You dont have enough points ({currentPoints})")
-            return
+    entries = [{"userId": userId ,"username": message.author.global_name, "points": poinstToGamble}]
+    calculate_winchance_percentages(entries)
+    data = {
+        "lotteryMessageId": "",
+        "entries": entries,
+        "creatorId": userId,
+        "startTime": datetime.now().isoformat()
+    }
+    FileService.store_file_data(file_path, data)
 
-        file_path = FileService.get_lottery_file_path()
+    #Remove points
+    PointsService.store_user_points(userId, currentPoints - poinstToGamble)
 
-        entries = [{"userId": userId ,"username": message.author.global_name, "points": poinstToGamble}]
-        calculate_winchance_percentages(entries)
-        data = {
-            "lotteryMessageId": "",
-            "entries": entries,
-            "creatorId": userId,
-            "startTime": datetime.now().isoformat()
-        }
-        FileService.store_file_data(file_path, data)
-
-        #Remove points
-        PointsService.store_user_points(userId, currentPoints - poinstToGamble)
-
-        await update_lottery_message(message)
-        await message.delete()
-    except:
-        await message.channel.send("Wrong syntax")
+    await update_lottery_message(message)
+    await message.delete()
 
 async def add_lottery_points(message: Message):
     if not ongoing_lottery():

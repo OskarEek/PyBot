@@ -1,4 +1,3 @@
-import json
 from typing import Optional
 
 #Models
@@ -29,9 +28,9 @@ def store_new_investment(userId: str, newInvestment: InvestmentModel):
     
     #Previous investment in this ticker already exists
     if investment != None:
-        if investment.certType != investment.certType:
+        if investment.certType != newInvestment.certType:
             raise Exception("Cant store new investment at same ticker with different certType")
-        if investment.multiplier != investment.multiplier:
+        if investment.multiplier != newInvestment.multiplier:
             raise Exception("Cant store new investment at same ticker with different multiplier")
         
         investment.add_new_investment(newInvestment.points, newInvestment.stockPrice)

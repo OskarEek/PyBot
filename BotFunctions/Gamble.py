@@ -1,13 +1,14 @@
 from discord import Message
 import random
 import time
-
 import config
+
+from Models.UserInput import UserIdInput, PointsInput
+
 from Services import FileService
 from Services import PointsService
 from Services import ChallangeService
 from Services import UserInputService
-from Models.UserInput import UserIdInput, PointsInput
 
 FREE_POINTS_COOLDOWN = 5 #Minutes
 
@@ -49,35 +50,22 @@ def points(message: Message) -> str:
 
 def gamble(message: Message) -> str:
     userId = str(message.author.id)
-    try:
-        userInput = message.content.split(" ")[-1]
-        poinstToGamble = 0
-        currentPoints = PointsService.get_user_points(userId)
+    currentPoints = PointsService.get_user_points(userId)
 
-        if userInput == "all":
-            if currentPoints == 0:
-                return "You dont have any points to gamble"
-            poinstToGamble = currentPoints
-        else:
-            poinstToGamble = int(userInput)
+    inputs = [PointsInput(currentPoints)]
+    inputs = UserInputService.get_user_input(message.content, inputs)
 
-        if poinstToGamble <= 0:
-            return "You did not enter a valid amount"
+    pointsToGamble = inputs[0].get_value()
 
-        if currentPoints < poinstToGamble:
-            return f"You dont have enough points ({currentPoints})"
-
-        x = random.randint(0, 1)
-        if x == 1:
-            result = currentPoints + poinstToGamble
-            PointsService.store_user_points(userId, result)
-            return f"{message.author.global_name} won {poinstToGamble}!, he now have {result} points"
-        else:
-            result = currentPoints - poinstToGamble
-            PointsService.store_user_points(userId, result)
-            return f"{message.author.global_name} lost {poinstToGamble} points, he now have {result} points"   
-    except:
-        return "Wrong syntax"
+    x = random.randint(0, 1)
+    if x == 1:
+        result = currentPoints + pointsToGamble
+        PointsService.store_user_points(userId, result)
+        return f"{message.author.global_name} won {pointsToGamble}!, he now have {result} points"
+    else:
+        result = currentPoints - pointsToGamble
+        PointsService.store_user_points(userId, result)
+        return f"{message.author.global_name} lost {pointsToGamble} points, he now have {result} points"   
 
 
 def challange(message: Message) -> str:

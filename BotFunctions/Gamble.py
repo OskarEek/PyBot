@@ -1,13 +1,14 @@
 from discord import Message
 import random
 import time
-
 import config
+
+from Models.UserInput import UserIdInput, PointsInput
+
 from Services import FileService
 from Services import PointsService
 from Services import ChallangeService
 from Services import UserInputService
-from Models.UserInput import UserIdInput, PointsInput
 
 FREE_POINTS_COOLDOWN = 5 #Minutes
 
@@ -49,35 +50,22 @@ def points(message: Message) -> str:
 
 def gamble(message: Message) -> str:
     userId = str(message.author.id)
-    try:
-        userInput = message.content.split(" ")[-1]
-        poinstToGamble = 0
-        currentPoints = PointsService.get_user_points(userId)
+    currentPoints = PointsService.get_user_points(userId)
 
-        if userInput == "all":
-            if currentPoints == 0:
-                return "You dont have any points to gamble"
-            poinstToGamble = currentPoints
-        else:
-            poinstToGamble = int(userInput)
+    inputs = [PointsInput(currentPoints)]
+    inputs = UserInputService.get_user_input(message.content, inputs)
 
-        if poinstToGamble <= 0:
-            return "You did not enter a valid amount"
+    pointsToGamble = inputs[0].get_value()
 
-        if currentPoints < poinstToGamble:
-            return f"You dont have enough points ({currentPoints})"
-
-        x = random.randint(0, 1)
-        if x == 1:
-            result = currentPoints + poinstToGamble
-            PointsService.store_user_points(userId, result)
-            return f"{message.author.global_name} won {poinstToGamble}!, he now have {result} points"
-        else:
-            result = currentPoints - poinstToGamble
-            PointsService.store_user_points(userId, result)
-            return f"{message.author.global_name} lost {poinstToGamble} points, he now have {result} points"   
-    except:
-        return "Wrong syntax"
+    x = random.randint(0, 1)
+    if x == 1:
+        result = currentPoints + pointsToGamble
+        PointsService.store_user_points(userId, result)
+        return f"{message.author.global_name} won {pointsToGamble}!, he now have {result} points"
+    else:
+        result = currentPoints - pointsToGamble
+        PointsService.store_user_points(userId, result)
+        return f"{message.author.global_name} lost {pointsToGamble} points, he now have {result} points"   
 
 
 def challange(message: Message) -> str:
@@ -87,8 +75,8 @@ def challange(message: Message) -> str:
 
     inputs = [UserIdInput(), PointsInput(currentPoints)]
     inputs = UserInputService.get_user_input(message.content, inputs)
-    opponentId = inputs[0].get_value()
-    pointsToGamble = inputs[1].get_value()
+    opponentId: str = inputs[0].get_value()
+    pointsToGamble: int = inputs[1].get_value()
 
     existingChallange = ChallangeService.get_challange(opponentId=userId, creatorId=opponentId)
     if existingChallange != None:
@@ -99,58 +87,43 @@ def challange(message: Message) -> str:
 
 def respond_challange(message: Message) -> str:
     userId = str(message.author.id)
-    userInputs = message.content.split(" ")
+    currentPoints = PointsService.get_user_points(userId)
 
-    try:
-        creatorId = userInputs[1].replace("@", "").replace(">", "").replace("<", "")
-        pointsToGambleInput = int(userInputs[2])
+    inputs = [UserIdInput(), PointsInput(currentPoints)]
+    inputs = UserInputService.get_user_input(message.content, inputs)
+    creatorId: str = inputs[0].get_value()
+    pointsToGamble: int = inputs[1].get_value()
 
-        currentPoints = PointsService.get_user_points(userId)
+    challange = ChallangeService.get_challange(userId, creatorId=creatorId)
+    if challange == None:
+        return f"<@{creatorId}> has not challanged you to any bets"
 
-        pointsToGamble = 0
-        if currentPoints == 0:
-            return "You dont have any points to gamble"
-        else:
-            pointsToGamble = int(pointsToGambleInput)
+    creatorPointsToGamble = challange['points']
+    creatorCurrentPoints = PointsService.get_user_points(creatorId)
 
-        if pointsToGamble <= 0:
-            return "You did not enter a valid amount"
-
-        if currentPoints < pointsToGamble:
-            return f"You dont have enough points ({currentPoints})"
-
-        challange = ChallangeService.get_challange(userId, creatorId=creatorId)
-        if challange == None:
-            return f"<@{creatorId}> has not challanged you to any bets"
-
-        creatorPointsToGamble = challange['points']
-        creatorCurrentPoints = PointsService.get_user_points(creatorId)
-
-        if creatorCurrentPoints < creatorPointsToGamble:
-            ChallangeService.remove_challange(userId, creatorId=creatorId)
-            return f"This bet is no longer available, <@{creatorId}> bet {creatorPointsToGamble} points but only has {creatorCurrentPoints} right now."
-
-        totalPoints = creatorPointsToGamble + pointsToGamble
-        winChance = (pointsToGamble / totalPoints) * 100
-        x = random.randint(0, 99)
-        returnMessage: str
-        if x < winChance:
-           result = currentPoints + creatorPointsToGamble
-           creatorResult = creatorCurrentPoints - creatorPointsToGamble
-           PointsService.store_user_points(userId, result)
-           PointsService.store_user_points(creatorId, creatorResult)
-           returnMessage = f"<@{userId}> wins {creatorPointsToGamble} points from <@{creatorId}> with a win chance of {winChance}%"
-        else:
-           result = currentPoints - pointsToGamble
-           creatorResult = creatorCurrentPoints + pointsToGamble
-           PointsService.store_user_points(userId, result)
-           PointsService.store_user_points(creatorId, creatorResult)
-           returnMessage = f"<@{creatorId}> wins {pointsToGamble} points from <@{userId}> with a win chance of {100 - winChance}%"
-           
+    if creatorCurrentPoints < creatorPointsToGamble:
         ChallangeService.remove_challange(userId, creatorId=creatorId)
-        return returnMessage
-    except:
-        return "Wrong syntax"
+        return f"This bet is no longer available, <@{creatorId}> bet {creatorPointsToGamble} points but only has {creatorCurrentPoints} right now."
+
+    totalPoints = creatorPointsToGamble + pointsToGamble
+    winChance = (pointsToGamble / totalPoints) * 100
+    x = random.randint(0, 99)
+    returnMessage: str
+    if x < winChance:
+       result = currentPoints + creatorPointsToGamble
+       creatorResult = creatorCurrentPoints - creatorPointsToGamble
+       PointsService.store_user_points(userId, result)
+       PointsService.store_user_points(creatorId, creatorResult)
+       returnMessage = f"<@{userId}> wins {creatorPointsToGamble} points from <@{creatorId}> with a win chance of {winChance}%"
+    else:
+       result = currentPoints - pointsToGamble
+       creatorResult = creatorCurrentPoints + pointsToGamble
+       PointsService.store_user_points(userId, result)
+       PointsService.store_user_points(creatorId, creatorResult)
+       returnMessage = f"<@{creatorId}> wins {pointsToGamble} points from <@{userId}> with a win chance of {100 - winChance}%"
+       
+    ChallangeService.remove_challange(userId, creatorId=creatorId)
+    return returnMessage
         
 
 async def leaderboard(message: Message):

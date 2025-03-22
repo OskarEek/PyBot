@@ -1,9 +1,13 @@
 from discord import Message
+from datetime import datetime, timedelta
 import random
 import time
+
+from Models.UserInput import StringInput, PointsInput
+
 from Services import FileService
 from Services import PointsService
-from datetime import datetime, timedelta
+from Services import UserInputService
 
 WIDTH = 7 
 
@@ -14,68 +18,43 @@ RED_SYMBOL = ":red_square:"
 GREEN_SYMBOL = ":green_square:"
 
 async def roulette(message: Message):
-    try:
-        userId = str(message.author.id)
-        color = message.content.split(" ")[1].lower()
-        points = message.content.split(" ")[2].lower()
-        if color not in ["red", "black", "green"]:
-            raise Exception("Invalid input")
+    userId = str(message.author.id)
+    currentPoints = PointsService.get_user_points(userId)
 
-        pointsToGamble = 0
-        currentPoints = PointsService.get_user_points(userId)
+    inputs = [StringInput(), PointsInput(currentPoints)]
+    inputs = UserInputService.get_user_input(message.content, inputs)
 
-        if points == "all":
-            if currentPoints == 0:
-                await message.channel.send("You dont have any points to gamble")
-                return
-            pointsToGamble = currentPoints
-        else:
-            pointsToGamble = int(points)
+    color: str = inputs[0].get_value()
+    color = color.lower()
+    pointsToGamble: int = inputs[1].get_value()
 
-        if pointsToGamble <= 0:
-            raise Exception("Invalid value")
+    if color not in ["red", "black", "green"]:
+        return "Color needs to be red, black or green"
 
-        if currentPoints < pointsToGamble:
-            await message.channel.send(f"You dont have enough points ({currentPoints})")
-            return
-
-        if not ongoing_roulette():
-            start_roulette(userId, message.author.global_name, color, pointsToGamble)
-        else:
-            file_path = FileService.get_roulette_file_path()
-            data = FileService.get_file_data(file_path)
-            entries: list[dict] = data["entries"]
-
-            userEntryExists = False
-            for userEntry in entries:
-                if userEntry["userId"] == userId and userEntry["color"] == color:
-                    userEntry["points"] = userEntry["points"] + pointsToGamble
-                    userEntryExists = True
-                    break
-
-            if not userEntryExists:
-                entries.append({"userId": userId ,"username": message.author.global_name, "color": color, "points": pointsToGamble})
-
-            data["entries"] = entries
-            FileService.store_file_data(file_path, data)
-
-        PointsService.store_user_points(userId, currentPoints - pointsToGamble)
-        await message.delete()
-        await update_roulette_message(message)
-    except:
-        await message.channel.send("Wrong syntax")
-
-def start_roulette(userId: str, userName:str, color: str, points: int):
+    if not ongoing_roulette():
+        start_roulette(userId, message.author.global_name, color, pointsToGamble)
+    else:
         file_path = FileService.get_roulette_file_path()
+        data = FileService.get_file_data(file_path)
+        entries: list[dict] = data["entries"]
 
-        entries = [{"userId": userId ,"username": userName, "points": points, "color": color}]
-        data = {
-            "rouletteMessageId": "",
-            "entries": entries,
-            "creatorId": userId,
-            "startTime": datetime.now().isoformat()
-        }
+        userEntryExists = False
+        for userEntry in entries:
+            if userEntry["userId"] == userId and userEntry["color"] == color:
+                userEntry["points"] = userEntry["points"] + pointsToGamble
+                userEntryExists = True
+                break
+
+        if not userEntryExists:
+            entries.append({"userId": userId ,"username": message.author.global_name, "color": color, "points": pointsToGamble})
+
+        data["entries"] = entries
         FileService.store_file_data(file_path, data)
+
+    PointsService.store_user_points(userId, currentPoints - pointsToGamble)
+    await message.delete()
+    await update_roulette_message(message)
+
 
 
 async def end_roulette(message: Message):
@@ -175,6 +154,11 @@ async def end_roulette(message: Message):
 
 
 
+
+
+
+#====== Helper functions ==================================================================================================
+
 def generate_middle_row(startPoint: int, playingCards: list) -> list:
     middleRow = [BOARDER_SYMBOL]
     for i in range(0, WIDTH-2):
@@ -185,7 +169,17 @@ def generate_middle_row(startPoint: int, playingCards: list) -> list:
     middleRow.append(BOARDER_SYMBOL)
     return middleRow
 
+def start_roulette(userId: str, userName:str, color: str, points: int):
+        file_path = FileService.get_roulette_file_path()
 
+        entries = [{"userId": userId ,"username": userName, "points": points, "color": color}]
+        data = {
+            "rouletteMessageId": "",
+            "entries": entries,
+            "creatorId": userId,
+            "startTime": datetime.now().isoformat()
+        }
+        FileService.store_file_data(file_path, data)
 
 def ongoing_roulette():
     file_path = FileService.get_roulette_file_path()

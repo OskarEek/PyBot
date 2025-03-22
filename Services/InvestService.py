@@ -83,5 +83,19 @@ def remove_investment(userId: str, ticker: str):
             return
 
 
+def get_all_investments(userId: str) -> list[InvestmentStorageModel]:
+    data = FileService.get_file_data(FILE_PATH)
+    data = data if data != None else {}
 
+    investments = data.get(userId, [])
+    
+    if len(investments) == 0:
+        return None
+    
+    investmentStorageModels: list[InvestmentStorageModel] = []
+    for d in investments:
+        storedInvestment = InvestmentStorageModel.from_dict(data=d)
+        investmentStorageModels.append(storedInvestment)
+
+    return investmentStorageModels
 

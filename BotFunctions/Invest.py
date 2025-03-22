@@ -114,3 +114,23 @@ def sell_investment(message: Message):
 
 
 
+
+def get_investments(message: Message):
+    userId = str(message.author.id)
+
+    investments = InvestService.get_all_investments(userId)
+
+    if len(investments) == 0:
+        return "You dont have any investments"
+
+    
+    out = "Your investments:\n"
+    for x in investments:
+        out += "- " + x.ticker + "\n"
+
+    return out
+    
+
+
+
+

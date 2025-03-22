@@ -1,6 +1,6 @@
 from discord import Message
 
-async def help(message: Message) -> str:
+def help(message: Message) -> str:
     helpMessage = [
         "\n"
         "__**Commands**__\n",

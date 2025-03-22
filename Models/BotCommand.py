@@ -21,6 +21,8 @@ class BotCommand:
         result: str
         try:
             result = self.operation(message)
+        except ValueError as e:
+            result = str(e)
         except Exception as e: 
             print(e)
             traceback.print_exc()
@@ -49,6 +51,8 @@ class AsyncBotCommand(BotCommand):
         result: str
         try:
             result = await self.asyncOperation(message)
+        except ValueError as e:
+            result = str(e)
         except Exception as e: 
             print(e)
             traceback.print_exc()

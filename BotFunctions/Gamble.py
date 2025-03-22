@@ -75,8 +75,8 @@ def challange(message: Message) -> str:
 
     inputs = [UserIdInput(), PointsInput(currentPoints)]
     inputs = UserInputService.get_user_input(message.content, inputs)
-    opponentId = inputs[0].get_value()
-    pointsToGamble = inputs[1].get_value()
+    opponentId: str = inputs[0].get_value()
+    pointsToGamble: int = inputs[1].get_value()
 
     existingChallange = ChallangeService.get_challange(opponentId=userId, creatorId=opponentId)
     if existingChallange != None:

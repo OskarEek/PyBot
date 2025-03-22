@@ -40,53 +40,36 @@ async def start_lottery(message: Message):
 
 async def add_lottery_points(message: Message):
     if not ongoing_lottery():
-        await message.channel.send("There is no ongoing lottery")
-        return
+        return "There is no ongoing lottery"
 
-    try:
-        userId = str(message.author.id)
-        userInput = message.content.split(" ")[-1]
-        poinstToGamble = 0
-        currentPoints = PointsService.get_user_points(userId)
+    userId = str(message.author.id)
+    currentPoints = PointsService.get_user_points(userId)
+        
+    inputs = [PointsInput(currentPoints)]
+    inputs = UserInputService.get_user_input(message.content, inputs)
+    poinstToGamble = inputs[0].get_value()
 
-        if userInput == "all":
-            if currentPoints == 0:
-                await message.channel.send("You dont have any points to gamble")
-                return
-            poinstToGamble = currentPoints
-        else:
-            poinstToGamble = int(userInput)
+    file_path = FileService.get_lottery_file_path()
+    data = FileService.get_file_data(file_path)
+    entries: list[dict] = data["entries"]
 
-        if poinstToGamble <= 0:
-            raise Exception("Invalid value")
+    userEntryExists = False
+    for userEntry in entries:
+        if userEntry["userId"] == userId:
+            userEntry["points"] = userEntry["points"] + poinstToGamble
+            userEntryExists = True
+            break
+        
+    if not userEntryExists:
+        entries.append({"userId": userId ,"username": message.author.global_name, "points": poinstToGamble})
 
-        if currentPoints < poinstToGamble:
-            await message.channel.send(f"You dont have enough points ({currentPoints})")
-            return
+    calculate_winchance_percentages(entries)
+    data["entries"] = entries
+    FileService.store_file_data(file_path, data)
 
-        file_path = FileService.get_lottery_file_path()
-        data = FileService.get_file_data(file_path)
-        entries: list[dict] = data["entries"]
-
-        userEntryExists = False
-        for userEntry in entries:
-            if userEntry["userId"] == userId:
-                userEntry["points"] = userEntry["points"] + poinstToGamble
-                userEntryExists = True
-                break
-            
-        if not userEntryExists:
-            entries.append({"userId": userId ,"username": message.author.global_name, "points": poinstToGamble})
-
-        calculate_winchance_percentages(entries)
-        data["entries"] = entries
-        FileService.store_file_data(file_path, data)
-
-        PointsService.store_user_points(userId, currentPoints - poinstToGamble)
-        await update_lottery_message(message)
-        await message.delete()
-    except:
-        await message.channel.send("Wrong syntax")
+    PointsService.store_user_points(userId, currentPoints - poinstToGamble)
+    await update_lottery_message(message)
+    await message.delete()
 
 
 def end_lottery(message: Message) -> str:

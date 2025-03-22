@@ -55,17 +55,6 @@ async def roulette(message: Message):
     await message.delete()
     await update_roulette_message(message)
 
-def start_roulette(userId: str, userName:str, color: str, points: int):
-        file_path = FileService.get_roulette_file_path()
-
-        entries = [{"userId": userId ,"username": userName, "points": points, "color": color}]
-        data = {
-            "rouletteMessageId": "",
-            "entries": entries,
-            "creatorId": userId,
-            "startTime": datetime.now().isoformat()
-        }
-        FileService.store_file_data(file_path, data)
 
 
 async def end_roulette(message: Message):
@@ -165,6 +154,11 @@ async def end_roulette(message: Message):
 
 
 
+
+
+
+#====== Helper functions ==================================================================================================
+
 def generate_middle_row(startPoint: int, playingCards: list) -> list:
     middleRow = [BOARDER_SYMBOL]
     for i in range(0, WIDTH-2):
@@ -175,7 +169,17 @@ def generate_middle_row(startPoint: int, playingCards: list) -> list:
     middleRow.append(BOARDER_SYMBOL)
     return middleRow
 
+def start_roulette(userId: str, userName:str, color: str, points: int):
+        file_path = FileService.get_roulette_file_path()
 
+        entries = [{"userId": userId ,"username": userName, "points": points, "color": color}]
+        data = {
+            "rouletteMessageId": "",
+            "entries": entries,
+            "creatorId": userId,
+            "startTime": datetime.now().isoformat()
+        }
+        FileService.store_file_data(file_path, data)
 
 def ongoing_roulette():
     file_path = FileService.get_roulette_file_path()

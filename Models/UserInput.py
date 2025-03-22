@@ -62,21 +62,18 @@ class PointsInput(UserInput):
 
 
 class UserIdInput(UserInput):
+    _rawInput: str
     _input: str
-    _guild: Guild
-
-    def __init__(self, message: Message):
-        self._guild = message.guild
 
     def input(self, input: str):
-        self._input = input.replace("@", "").replace(">", "").replace("<", "")
+        self._rawInput = input
+        self._input = self._rawInput.replace("@", "").replace(">", "").replace("<", "")
 
     def get_value(self) -> str:
         return self._input
     
     def validate(self) -> Optional[str]:
-        member = asyncio.run(self._guild.fetch_member(self._input))
-        if member == None:
-            return "There is no such user"
+        if "@" not in self._rawInput or ">" not in self._rawInput or "<" not in self._rawInput:
+            return "This does not seem to be a user"
         return None
     

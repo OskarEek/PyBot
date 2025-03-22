@@ -85,7 +85,7 @@ def challange(message: Message) -> str:
     try:
         currentPoints = PointsService.get_user_points(userId)
 
-        inputs = [UserIdInput(message), PointsInput(currentPoints)]
+        inputs = [UserIdInput(), PointsInput(currentPoints)]
         result = UserInputService.get_user_input(message.content, inputs)
         inputs = result.userInputs
         

@@ -34,11 +34,11 @@ def invest(message: Message):
         return "You need to enter \"bear\" or \"bull\""
     if multiplier <= 0 or multiplier > 20:
         return "Multiplier must be between 1 - 20"
-    if currentInvestment.certType != certType:
+    if currentInvestment != None and currentInvestment.certType != certType:
         position = "long" if certType == "BULL" else "short"
         currentInvestmentPosition = "short" if position == "long" else "long"
         return f"You cant take a {position} position in {ticker} since you already have a {currentInvestmentPosition} investment in this stock"
-    if currentInvestment.multiplier != multiplier:
+    if currentInvestment != None and currentInvestment.multiplier != multiplier:
         return f"You cant invest in {ticker} with a different multiplier ({multiplier}) as your current investment {currentInvestment.multiplier}"
     
     stockHandler = StockHandler(ticker)

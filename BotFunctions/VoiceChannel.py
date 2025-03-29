@@ -21,7 +21,7 @@ async def play(message: Message):
     client = await channel.connect()
     player = await YTDLSource.from_url(url=url, stream=True)
     print(player)
-    await client.play(player)
+    client.play(player)
     await client.disconnect()
         
         

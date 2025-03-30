@@ -24,6 +24,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
         loop = asyncio.get_event_loop()
         info = ytdl.extract_info(url=url, download=not stream)
 
+        #Validation
         duration = info.get('duration', None)
         if duration != None:
             if int(duration) / 60 > 15: #Max 15 minute videos
@@ -32,7 +33,9 @@ class YTDLSource(discord.PCMVolumeTransformer):
         data = await loop.run_in_executor(None, lambda: info)
         if 'entries' in data:
             data = data['entries'][0]
+
         audio_url = None
+
         for fmt in data.get('formats', []):
             if fmt.get('acodec') != 'none':  # Ensure format contains an audio codec
                 audio_url = fmt.get('url')

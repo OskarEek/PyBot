@@ -11,6 +11,7 @@
 
 
 Trouble shooting:
+
     - If you get audioop error when running bot in step 3, it might work to run the following command: "pip install audioop-lts"
 
     - To be able to play music from youtube using ".play <url>" command you need to use have ffmpeg install on the computer you're running the bot from

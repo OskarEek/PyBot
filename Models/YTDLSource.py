@@ -30,11 +30,11 @@ class YTDLSource(discord.PCMVolumeTransformer):
         for fmt in data.get('formats', []):
             if fmt.get('acodec') != 'none':  # Ensure format contains an audio codec
                 audio_url = fmt.get('url')
-                break  # Select the first valid audio format
+                break
 
         if not audio_url:
             raise Exception("No valid audio stream found!")
-        #filename = data['url'] if stream else ytdl.prepare_filename(data)
+
         ffmpeg_opts = {
             'options': '-vn',
         }

@@ -20,9 +20,10 @@ async def play(message: Message):
     channel = message.author.voice.channel
     client = await channel.connect()
     player = await YTDLSource.from_url(url=url, stream=True)
-    print(player)
-    client.play(player)
-    await client.disconnect()
-        
+    def after_play(error):
+        coro = client.disconnect()
+        asyncio.run_coroutine_threadsafe(coro, client.loop)
+
+    client.play(player, after=after_play)
         
         

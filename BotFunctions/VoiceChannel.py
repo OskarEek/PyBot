@@ -17,10 +17,13 @@ async def play(message: Message):
     if not message.author.voice:
         return "You need to be in a voice channel"
 
+    player = await YTDLSource.from_url(url=url, stream=True)
+
+    if player == None:
+        return "Max 15 minute video"
+
     channel = message.author.voice.channel
     client = await channel.connect()
-    player = await YTDLSource.from_url(url=url, stream=True)
-    print(player.data)
 
     def after_play(error):
         coro = client.disconnect()

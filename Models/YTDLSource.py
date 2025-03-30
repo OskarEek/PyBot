@@ -22,10 +22,16 @@ class YTDLSource(discord.PCMVolumeTransformer):
     @classmethod
     async def from_url(cls, url, *, stream=False):
         loop = asyncio.get_event_loop()
-        data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url=url, download=not stream))
+        info = ytdl.extract_info(url=url, download=not stream)
+
+        duration = info.get('duration', None)
+        if duration != None:
+            if int(duration) / 60 > 15: #Max 15 minute videos
+                return None
+
+        data = await loop.run_in_executor(None, lambda: info)
         if 'entries' in data:
             data = data['entries'][0]
-        
         audio_url = None
         for fmt in data.get('formats', []):
             if fmt.get('acodec') != 'none':  # Ensure format contains an audio codec

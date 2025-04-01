@@ -24,7 +24,7 @@ botCommands: dict[str, BotCommand] = {
     ".roulette":        AsyncBotCommand(".roulette", "", Roulette.roulette),
     ".end-roulette":    AsyncBotCommand(".end-roulette", "", Roulette.end_roulette),
     ".invest":          BotCommand(".invest", "", Invest.invest),
-    ".get-investment":  BotCommand(".get-investment", "", Invest.get_investment),
+    ".investment":      BotCommand(".investment", "", Invest.get_investment),
     ".sell-investment": BotCommand(".sell-investment", "", Invest.sell_investment),
     ".all-investments": BotCommand(".all-investments", "", Invest.get_investments),
     ".play":            AsyncBotCommand(".play", "", VoiceChannel.play),

@@ -30,6 +30,7 @@ async def play(message: Message):
     MusicQueueService.queue_link(channelId, url)
 
     if len(queue) == 0:
+        print("Queue is empty, joining voice channel")
         client = await channel.connect()
     else:
         return "Link queued"
@@ -43,6 +44,7 @@ async def play(message: Message):
 
     while len(queue) > 0:
         link = MusicQueueService.get_first_link()
+        print("Getting first link from queue: " + link)
 
         if link == None:
             return "No links in queue"

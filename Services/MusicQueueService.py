@@ -27,7 +27,7 @@ def dequeue_first_link(voiceChannelId: str):
         return
     
     queue: list[str] = data["queue"]
-    if len(queue > 0):
+    if len(queue) > 0:
         queue.pop(0)
 
     data["queue"] = queue
@@ -40,7 +40,7 @@ def get_first_link(voiceChannelId: str) -> Optional[str]:
         return None
     
     queue: list[str] = data["queue"]
-    if len(queue > 0):
+    if len(queue) > 0:
         return queue[0]
     else:
         return None

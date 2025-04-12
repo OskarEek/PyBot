@@ -44,7 +44,7 @@ async def play(message: Message):
         asyncio.run_coroutine_threadsafe(coro, client.loop)
 
     while len(queue) > 0:
-        link = MusicQueueService.get_first_link()
+        link = MusicQueueService.get_first_link(channelId)
         print("Getting first link from queue: " + link)
 
         if link == None:

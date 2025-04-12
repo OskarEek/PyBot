@@ -75,6 +75,9 @@ def get_cooldown_file_path() -> str:
 def get_roulette_file_path() -> str:
     return f"{BASE_FILE_PATH}/Roulette/roulette.json"
 
+def get_music_queue_file_path(voiceChannelId: str):
+    return f"{BASE_FILE_PATH}/MusicQueue/{voiceChannelId}.json"
+
 def get_cooldowns() -> dict:
     file = get_cooldown_file_path()
 

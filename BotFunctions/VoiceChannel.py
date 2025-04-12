@@ -5,6 +5,8 @@ import yt_dlp
 from Models.YTDLSource import YTDLSource
 from Models.UserInput import StringInput
 
+from Services import MusicQueueService
+
 from Services import UserInputService
 
 async def play(message: Message):
@@ -17,18 +19,39 @@ async def play(message: Message):
     if not message.author.voice:
         return "You need to be in a voice channel"
 
-    player = await YTDLSource.from_url(url=url, stream=True)
-
-    if player == None:
-        return "Max 15 minute video"
-
     channel = message.author.voice.channel
-    client = await channel.connect()
 
+    queue: list[str] = MusicQueueService.fetch_queue()
+
+    if len(queue) >= 10:
+        return "Queue is full"
+
+    MusicQueueService.queue_link(channel.id, url)
+
+    if len(queue) == 0:
+        client = await channel.connect()
+    else:
+        return "Link queued"
+    
     def after_play(error):
+        queue = MusicQueueService.fetch_queue(channel.id)
+        if len(queue) > 0:
+            return
         coro = client.disconnect()
         asyncio.run_coroutine_threadsafe(coro, client.loop)
 
-    client.play(player, after=after_play)
-        
-        
+    while len(queue) > 0:
+        link = MusicQueueService.get_first_link()
+
+        if link == None:
+            return "No links in queue"
+
+        player = await YTDLSource.from_url(url=link, stream=True)
+
+        if player == None:
+            await message.channel.send(f"Max 15 minute video, skipping {link}")
+            continue
+
+        link = MusicQueueService.dequeue_first_link(channel.id)
+
+        client.play(player, after=after_play)

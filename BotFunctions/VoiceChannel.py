@@ -32,6 +32,7 @@ async def play(message: Message):
     if len(queue) == 0:
         print("Queue is empty, joining voice channel")
         client = await channel.connect()
+        queue.append(url) #Manually add the link to avoid needing to fetch queue again
     else:
         return "Link queued"
     

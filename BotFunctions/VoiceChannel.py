@@ -20,13 +20,14 @@ async def play(message: Message):
         return "You need to be in a voice channel"
 
     channel = message.author.voice.channel
+    channelId = str(channel.id)
 
-    queue: list[str] = MusicQueueService.fetch_queue()
+    queue: list[str] = MusicQueueService.fetch_queue(channelId)
 
     if len(queue) >= 10:
         return "Queue is full"
 
-    MusicQueueService.queue_link(channel.id, url)
+    MusicQueueService.queue_link(channelId, url)
 
     if len(queue) == 0:
         client = await channel.connect()
@@ -34,7 +35,7 @@ async def play(message: Message):
         return "Link queued"
     
     def after_play(error):
-        queue = MusicQueueService.fetch_queue(channel.id)
+        queue = MusicQueueService.fetch_queue(channelId)
         if len(queue) > 0:
             return
         coro = client.disconnect()
@@ -52,6 +53,6 @@ async def play(message: Message):
             await message.channel.send(f"Max 15 minute video, skipping {link}")
             continue
 
-        link = MusicQueueService.dequeue_first_link(channel.id)
+        link = MusicQueueService.dequeue_first_link(channelId)
 
         client.play(player, after=after_play)

@@ -6,7 +6,7 @@ from BotFunctions import Help
 from BotFunctions import Lottery
 from BotFunctions import Roulette
 from BotFunctions import Invest
-from BotFunctions import Hue
+#from BotFunctions import Hue
 from BotFunctions import VoiceChannel
 
 botCommands: dict[str, BotCommand] = {

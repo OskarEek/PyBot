@@ -10,12 +10,14 @@ class BotCommand:
     def __init__(
             self,
             command: str,
+            group: str,
             explanation: str,
             operation: Callable[[Optional[Message]], Optional[str]],
             ):
         self.command = command
         self.operation = operation
         self.explanation = explanation
+        self.group = group
 
     async def execute(self, message: Message):
         result: str
@@ -40,12 +42,14 @@ class AsyncBotCommand(BotCommand):
 
     def __init__(self,
                 command: str,
+                group: str,
                 explanation: str,
                 operation: Callable[[Optional[Message]], Awaitable[Optional[str]]]
                 ):
         self.command = command
         self.explanation = explanation
         self.asyncOperation = operation
+        self.group = group
 
     async def execute(self, message):
         result: str
